@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mytaxi.spring.multirabbit</groupId>
+    <artifactId>spring-multirabbit-parent</artifactId>
+    <version>1.5.5-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Spring Multirabbit</name>
+    <description>Library to extend Spring to provide connection to multiple RabbitMQ servers</description>
+
+    <url>http://www.mytaxi.com</url>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Wander Costa</name>
+            <email>w.bezerra-da-costa@mytaxi.com</email>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>spring-multirabbit-lib</module>
+        <module>spring-multirabbit-lib-integration</module>
+        <module>spring-multirabbit-examples/spring-multirabbit-example-java</module>
+        <module>spring-multirabbit-examples/spring-multirabbit-example-kotlin</module>
+        <module>spring-multirabbit-examples/spring-multirabbit-extension-example</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <springboot.version>1.5.17.RELEASE</springboot.version>
+    </properties>
+
+    <scm>
+        <tag>HEAD</tag>
+        <url>scm:git:https://github.com/mytaxi/spring-multirabbit.git</url>
+        <connection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</connection>
+        <developerConnection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</developerConnection>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>bintray-mytaxi-oss</id>
+            <name>mytaxi-oss</name>
+            <url>https://api.bintray.com/maven/mytaxi/oss/spring-multirabbit/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
