@@ -9,12 +9,6 @@ import javax.validation.ConstraintValidatorContext;
 class SingleDefaultRabbitValidator implements ConstraintValidator<SingleDefaultRabbit, MultiRabbitPropertiesMap>
 {
 
-    @Override
-    public void initialize(SingleDefaultRabbit constraintAnnotation)
-    {
-    }
-
-
     /**
      * Returns true if at most one {@link ExtendedRabbitProperties} is found with default=true.
      */

@@ -35,7 +35,7 @@ class SomeListeners
     @RabbitListener(bindings = [(QueueBinding(
             value = Queue(SAMPLE_QUEUE),
             exchange = Exchange(SAMPLE_EXCHANGE),
-            key = SAMPLE_ROUTING_KEY))])
+            key = arrayOf(SAMPLE_ROUTING_KEY)))])
     fun listen(message: String)
     {
         logger.info("Default Listener: {}", message)
@@ -51,7 +51,7 @@ class SomeListeners
     @RabbitListener(containerFactory = "connectionNameA", bindings = [(QueueBinding(
             value = Queue(SAMPLE_QUEUE_A),
             exchange = Exchange(SAMPLE_EXCHANGE_A),
-            key = SAMPLE_ROUTING_KEY_A))])
+            key = arrayOf(SAMPLE_ROUTING_KEY_A)))])
     fun listenConnectionNameA(message: String)
     {
         logger.info("Listener 'connectionNameA': {}", message)
@@ -67,7 +67,7 @@ class SomeListeners
     @RabbitListener(containerFactory = "connectionNameB", bindings = [(QueueBinding(
             value = Queue(SAMPLE_QUEUE_B),
             exchange = Exchange(SAMPLE_EXCHANGE_B),
-            key = SAMPLE_ROUTING_KEY_B))])
+            key = arrayOf(SAMPLE_ROUTING_KEY_B)))])
     fun listenConnectionNameB(message: String)
     {
         logger.info("Listener 'connectionNameB': {}", message)

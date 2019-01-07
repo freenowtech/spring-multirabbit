@@ -1,3 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration,\
-  org.springframework.amqp.rabbit.annotation.ExtendedRabbitListenerAnnotationBeanPostProcessor
