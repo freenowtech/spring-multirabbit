@@ -1,5 +1,5 @@
 # Spring MultiRabbit
-**Spring MultiRabbit** is a library to enable multiple RabbitMQ servers in SpringBoot applications. The modules are:
+**Spring MultiRabbit** is a library to enable multiple RabbitMQ brokers in SpringBoot applications. The modules are:
 * **spring-multirabbit-lib** - the main module, that provides the auto-configuration feature;
 * **spring-multirabbit-lib-integration** - a module to test integration with Spring;
 * **spring-multirabbit-example-java** - an example project in Java;
@@ -28,16 +28,27 @@ public class Application {
 ```
 
 ##### 2. pom.xml
+Add the reference to the repository, and the necessary libs:
 ```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-amqp</artifactId>
-</dependency>
-<dependency>
-    <groupId>com.mytaxi.spring.multirabbit</groupId>
-    <artifactId>spring-multirabbit-lib</artifactId>
-    <version>${multirabbit.version}</version>
-</dependency>
+<repositories>
+    <repository>
+        <id>bintray-mytaxi-oss</id>
+        <name>bintray</name>
+        <url>https://dl.bintray.com/mytaxi/oss</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.mytaxi.spring.multirabbit</groupId>
+        <artifactId>spring-multirabbit-lib</artifactId>
+        <version>${multirabbit.version}</version>
+    </dependency>
+</dependencies>
 ```
 
 ##### 3. application.yml
@@ -78,7 +89,7 @@ void someListener(String message) {
 }
 
 /**
- * Listener for the server tagged as `connectionNameA`. 
+ * Listener for the broker tagged as `connectionNameA`. 
  */
 @RabbitListener(queues = "anotherQueue", containerFactory = "connectionNameA") 
 void anotherListener(String message) {
@@ -87,17 +98,17 @@ void anotherListener(String message) {
 ```
 
 ## Configuration Interactions
-This library enables the possibility of having multiple Rabbit servers, configured from the property
+This library enables the possibility of having multiple RabbitMQ brokers, configured from the property
 **spring.multirabbitmq**. However, for maximum compatibility, it does not change the default capacity of configuring a
 connection with the existent **spring.rabbitmq** property.
 
 Thus, it's important to understand how the application will behave when multiple configurations are provided:
-* Unlimited number of connections can be set, but the user must be aware of the implications of maintaining many 
-connections;
-* The default connection **spring.rabbitmq** will always exist, even if not explicitly defined.
-  * **EXCEPT** when one connection under **spring.multirabbit** is set with **defaultConnection: true**. In this case, 
+* Unlimited number of connections can be set, but the user must be aware of the implications of maintaining them;
+* The default server **spring.rabbitmq** will always exist, even if not explicitly defined.
+  * **EXCEPT** when one server under **spring.multirabbit** is set with **defaultConnection: true**. In this case, 
   any configuration provided with the default **spring.rabbitmq** will be ignored.
-* It's not possible to have more than one connection under **spring.multirabbit** being set with **defaultConnection: true**.
+* It's not possible to have more than one connection under **spring.multirabbit** being set with **defaultConnection: 
+true**.
 
 
 
