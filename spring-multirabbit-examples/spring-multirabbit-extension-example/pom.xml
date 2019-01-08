@@ -12,7 +12,7 @@
 
     <groupId>com.mytaxi.spring.multirabbit</groupId>
     <artifactId>spring-multirabbit-extended-example-java</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Spring Multirabbit Extension Example</name>
@@ -61,8 +61,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <tag>spring-multirabbit-parent-1.5.5</tag>
-  </scm>
 </project>
