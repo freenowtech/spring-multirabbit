@@ -9,10 +9,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionNameStrategy;
 import org.springframework.amqp.rabbit.connection.RoutingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SimpleResourceHolder;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -21,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -40,6 +43,9 @@ public class MultiRabbitConnectionFactoryCreatorTest
 
     @Mock
     private ApplicationContext applicationContext;
+
+    @Mock
+    private ObjectProvider<ConnectionNameStrategy> connectionNameStrategy;
 
     @Mock
     private MultiRabbitConnectionFactoryWrapper wrapper;
@@ -72,7 +78,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
     private MultiRabbitAutoConfiguration.MultiRabbitConnectionFactoryCreator creator()
     {
         MultiRabbitAutoConfiguration.MultiRabbitConnectionFactoryCreator config
-            = new MultiRabbitAutoConfiguration.MultiRabbitConnectionFactoryCreator(springFactoryCreator);
+            = new MultiRabbitAutoConfiguration.MultiRabbitConnectionFactoryCreator(springFactoryCreator, connectionNameStrategy);
         config.setBeanFactory(beanFactory);
         config.setApplicationContext(applicationContext);
         return config;
@@ -184,7 +190,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
     @Test
     public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithMultipleConnections() throws Exception
     {
-        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class)))
+        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenReturn(new CachingConnectionFactory());
 
         MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
@@ -192,14 +198,14 @@ public class MultiRabbitConnectionFactoryCreatorTest
 
         creator().routingConnectionFactory(null, multiRabbitPropertiesMap, wrapper);
 
-        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties);
+        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties, connectionNameStrategy);
     }
 
 
     @Test
     public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultAndMultipleConnections() throws Exception
     {
-        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class)))
+        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenReturn(new CachingConnectionFactory());
 
         MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
@@ -207,8 +213,8 @@ public class MultiRabbitConnectionFactoryCreatorTest
 
         creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
 
-        verify(springFactoryCreator).rabbitConnectionFactory(rabbitProperties);
-        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties);
+        verify(springFactoryCreator).rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
+        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties, connectionNameStrategy);
     }
 
 
@@ -218,7 +224,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
         exception.expect(RuntimeException.class);
         exception.expectMessage("mocked-exception");
 
-        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class)))
+        when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenThrow(new Exception("mocked-exception"));
 
         MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
