@@ -15,11 +15,13 @@ import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionNameStrategy;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -89,11 +91,15 @@ public class MultiRabbitAutoConfiguration
         private ConfigurableListableBeanFactory beanFactory;
         private ApplicationContext applicationContext;
         private final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator;
+        private final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy;
 
 
-        MultiRabbitConnectionFactoryCreator(RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator)
+        MultiRabbitConnectionFactoryCreator(
+            RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator,
+            ObjectProvider<ConnectionNameStrategy> connectionNameStrategy)
         {
             this.springFactoryCreator = springFactoryCreator;
+            this.connectionNameStrategy = connectionNameStrategy;
         }
 
 
@@ -196,7 +202,7 @@ public class MultiRabbitAutoConfiguration
         {
             try
             {
-                return springFactoryCreator.rabbitConnectionFactory(rabbitProperties);
+                return springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
             }
             catch (Exception ex)
             {
