@@ -189,6 +189,9 @@ spring:
             port: 5674
 ```
 
+## Compatibility of versions
+For the table of compatibility, please visit the [Wiki](https://github.com/mytaxi/spring-multirabbit/wiki) page.
+
 ## More Examples
 More examples can be found at the modules **spring-multirabbit-example-java** and **spring-multirabbit-example-kotlin**.
 As listeners are defined, they will try to connect in 3 different addresses:
