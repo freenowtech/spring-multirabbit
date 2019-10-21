@@ -8,10 +8,8 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.rabbit.annotation.ExtendedRabbitListenerAnnotationBeanPostProcessor;
-import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
+import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -22,7 +20,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Role;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -46,22 +42,11 @@ import static java.util.stream.Collectors.toMap;
 @Configuration
 @ConditionalOnClass({RabbitTemplate.class, Channel.class})
 @EnableConfigurationProperties({RabbitProperties.class, MultiRabbitPropertiesMap.class})
-@Import(RabbitAnnotationDrivenConfiguration.class)
+@Import({MultiRabbitBootstrapConfiguration.class, RabbitAnnotationDrivenConfiguration.class})
 public class MultiRabbitAutoConfiguration
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRabbitAutoConfiguration.class);
-
-
-    @Primary
-    @Bean(name = RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)
-    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-    @DependsOn(MultiRabbitConstants.CONNECTION_FACTORY_BEAN_NAME)
-    public RabbitListenerAnnotationBeanPostProcessor rabbitListenerAnnotationProcessor()
-    {
-        return new ExtendedRabbitListenerAnnotationBeanPostProcessor();
-    }
-
 
     @Bean(MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME)
     @Primary

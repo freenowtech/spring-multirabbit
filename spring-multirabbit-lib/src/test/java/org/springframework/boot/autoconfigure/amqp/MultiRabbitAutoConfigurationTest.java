@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.amqp.rabbit.annotation.ExtendedRabbitListenerAnnotationBeanPostProcessor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
@@ -21,13 +20,6 @@ public class MultiRabbitAutoConfigurationTest
     private MultiRabbitAutoConfiguration config()
     {
         return new MultiRabbitAutoConfiguration();
-    }
-
-
-    @Test
-    public void shouldInstantiateExtendedRabbitListenerAnnotationBeanPostProcessor()
-    {
-        assertTrue(config().rabbitListenerAnnotationProcessor() instanceof ExtendedRabbitListenerAnnotationBeanPostProcessor);
     }
 
 
