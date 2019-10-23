@@ -4,13 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.ExtendedRabbitListenerAnnotationBeanPostProcessor;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
@@ -84,7 +78,7 @@ public class BeansValidationTest
     @Test
     public void shouldResolveExtendedRabbitListenerAnnotationBeanPostProcessor()
     {
-        assertTrue(rabbitListenerAnnotationBeanPostProcessor instanceof ExtendedRabbitListenerAnnotationBeanPostProcessor);
+        assertTrue(rabbitListenerAnnotationBeanPostProcessor instanceof MultiRabbitListenerAnnotationBeanPostProcessor);
     }
 
 

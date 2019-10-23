@@ -18,13 +18,17 @@ import org.springframework.context.ApplicationContextAware;
  * This processing enables each {@link RabbitAdmin} to differentiate which beans corresponds to that specific
  * {@link RabbitAdmin}, preventing the server from being populated with non-expected structures from other
  * servers.
+ *
+ * @author Wander Costa
+ *
+ * @see RabbitListenerAnnotationBeanPostProcessor
  */
-public class ExtendedRabbitListenerAnnotationBeanPostProcessor
+public class MultiRabbitListenerAnnotationBeanPostProcessor
     extends RabbitListenerAnnotationBeanPostProcessor
     implements ApplicationContextAware, BeanFactoryAware
 {
 
-    private static final String NO_ADMIN_BEAN_ERROR = "Bean '%s' not a RabbitAdmin. Cannot enhance beans with RabbitAdmin.";
+    private static final String NO_ADMIN_BEAN_ERROR = "Bean '%s' for RabbitAdmin not found.";
 
     private ApplicationContext applicationContext;
     private BeanFactory beanFactory;
@@ -68,12 +72,12 @@ public class ExtendedRabbitListenerAnnotationBeanPostProcessor
     private RabbitAdmin getRabbitAdminBean(RabbitListener rabbitListener)
     {
         String name = RabbitAdminNameResolver.resolve(rabbitListener);
-        Object rabbitAdmin = beanFactory.getBean(name);
-        if (!(rabbitAdmin instanceof RabbitAdmin))
+        RabbitAdmin rabbitAdmin = beanFactory.getBean(name, RabbitAdmin.class);
+        if (rabbitAdmin == null)
         {
             throw new IllegalStateException(String.format(NO_ADMIN_BEAN_ERROR, name));
         }
-        return (RabbitAdmin) rabbitAdmin;
+        return rabbitAdmin;
     }
 
 

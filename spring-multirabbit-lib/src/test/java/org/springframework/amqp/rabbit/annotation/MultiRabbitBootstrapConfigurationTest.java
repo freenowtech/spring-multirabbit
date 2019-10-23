@@ -25,6 +25,6 @@ public class MultiRabbitBootstrapConfigurationTest
 		configuration.registerBeanDefinitions(null, registry);
 
 		verify(registry).registerBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
-				new RootBeanDefinition(ExtendedRabbitListenerAnnotationBeanPostProcessor.class));
+				new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
 	}
 }

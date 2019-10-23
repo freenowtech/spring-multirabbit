@@ -66,10 +66,10 @@ public class MultiRabbitConnectionFactoryCreatorTest
     private RabbitProperties rabbitProperties;
 
     @Mock
-    private MultiRabbitPropertiesMap multiRabbitPropertiesMap;
+    private RabbitProperties secondaryRabbitProperties;
 
     @Mock
-    private ExtendedRabbitProperties extendedRabbitProperties;
+    private MultiRabbitProperties multiRabbitProperties;
 
     @Mock
     private RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator;
@@ -97,7 +97,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
     @Test
     public void shouldInstantiateRoutingConnectionFactory()
     {
-        assertTrue(creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper) instanceof RoutingConnectionFactory);
+        assertTrue(creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper) instanceof RoutingConnectionFactory);
     }
 
 
@@ -109,7 +109,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
 
-        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
 
         assertTrue(routingConnectionFactory instanceof SimpleRoutingConnectionFactory);
         verify(beanFactory).registerSingleton(DUMMY_KEY, containerFactory);
@@ -123,7 +123,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
     {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
 
-        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
 
         assertTrue(routingConnectionFactory instanceof SimpleRoutingConnectionFactory);
         verifyZeroInteractions(beanFactory);
@@ -137,7 +137,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
 
-        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
 
         assertTrue(routingConnectionFactory instanceof SimpleRoutingConnectionFactory);
         verify(beanFactory).registerSingleton(DUMMY_KEY, containerFactory);
@@ -154,7 +154,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
 
-        creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper).getVirtualHost();
+        creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper).getVirtualHost();
 
         verify(connectionFactory0).getVirtualHost();
         verifyZeroInteractions(connectionFactory1);
@@ -169,7 +169,7 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
 
-        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
 
         SimpleResourceHolder.bind(routingConnectionFactory, DUMMY_KEY);
         routingConnectionFactory.getVirtualHost();
@@ -193,12 +193,12 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenReturn(new CachingConnectionFactory());
 
-        MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
-        multiRabbitPropertiesMap.put(DUMMY_KEY, extendedRabbitProperties);
+        MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
+        multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
 
-        creator().routingConnectionFactory(null, multiRabbitPropertiesMap, wrapper);
+        creator().routingConnectionFactory(null, multiRabbitProperties, wrapper);
 
-        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties, connectionNameStrategy);
+        verify(springFactoryCreator).rabbitConnectionFactory(secondaryRabbitProperties, connectionNameStrategy);
     }
 
 
@@ -208,13 +208,13 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenReturn(new CachingConnectionFactory());
 
-        MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
-        multiRabbitPropertiesMap.put(DUMMY_KEY, extendedRabbitProperties);
+        MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
+        multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
 
-        creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
 
         verify(springFactoryCreator).rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
-        verify(springFactoryCreator).rabbitConnectionFactory(extendedRabbitProperties, connectionNameStrategy);
+        verify(springFactoryCreator).rabbitConnectionFactory(secondaryRabbitProperties, connectionNameStrategy);
     }
 
 
@@ -227,10 +227,10 @@ public class MultiRabbitConnectionFactoryCreatorTest
         when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
             .thenThrow(new Exception("mocked-exception"));
 
-        MultiRabbitPropertiesMap multiRabbitPropertiesMap = new MultiRabbitPropertiesMap();
-        multiRabbitPropertiesMap.put(DUMMY_KEY, extendedRabbitProperties);
+        MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
+        multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
 
-        creator().routingConnectionFactory(rabbitProperties, multiRabbitPropertiesMap, wrapper);
+        creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
     }
 
 }

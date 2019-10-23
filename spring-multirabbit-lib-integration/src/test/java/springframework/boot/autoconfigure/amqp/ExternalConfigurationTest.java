@@ -11,7 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitConnectionFactoryWrapper;
-import org.springframework.boot.autoconfigure.amqp.MultiRabbitPropertiesMap;
+import org.springframework.boot.autoconfigure.amqp.MultiRabbitProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +41,7 @@ public class ExternalConfigurationTest
     private ConnectionFactory connectionFactory;
 
     @Autowired
-    private MultiRabbitPropertiesMap propertiesMap;
+    private MultiRabbitProperties multiRabbitProperties;
 
 
     @After
@@ -74,7 +74,7 @@ public class ExternalConfigurationTest
     @Test
     public void shouldResolveExistentConnectionFactoriesFromMulti()
     {
-        propertiesMap.keySet().forEach(key -> {
+        multiRabbitProperties.getConnections().keySet().forEach(key -> {
             SimpleResourceHolder.bind(connectionFactory, key);
             connectionFactory.getVirtualHost();
             SimpleResourceHolder.unbind(connectionFactory);

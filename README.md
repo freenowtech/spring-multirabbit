@@ -9,10 +9,10 @@
 ## How-to
 To use the library, the project must:
 1. Be a SpringBoot project annotated with **@EnableRabbit**, as usual;
-2. Import the dependency to **spring-multirabbit-lib**;
-3. Provide the map of configuration for additional connections in the new path **spring.multirabbitmq**. All 
-   attributes available for **spring.rabbitmq** can be used in **spring.multirabbitmq**. 
-4. Change the Rabbit context when talking to different servers:
+2. Import the library **spring-multirabbit-lib**;
+3. Provide configuration for additional brokers in the new path **spring.multirabbitmq.connections**. All 
+   attributes available for **spring.rabbitmq** can be used in **spring.multirabbitmq.connections**. 
+4. Change the container factory context when using non-default connections:
    1. For ```RabbitTemplate```, use ```SimpleResourceHolder.bind()``` and ```SimpleResourceHolder.unbind()```;
    2. For ```@RabbitListener```, define the ```containerFactory``` or leave it blank for the default connection.
 
@@ -58,12 +58,13 @@ spring:
         host: 10.0.0.10
         port: 5672
     multirabbitmq:
-        connectionNameA:
-            host: 200.10.10.10
-            port: 5672
-        connectionNameB:
-            host: 173.49.20.18
-            port: 5672
+        connections:
+            connectionNameA:
+                host: 200.10.10.10
+                port: 5672
+            connectionNameB:
+                host: 173.49.20.18
+                port: 5672
 ```
 
 ##### 4.1. Change context when using RabbitTemplate
@@ -123,35 +124,38 @@ spring:
         port: 5672
 ``` 
 
-#### Only spring.multirabbitmq (no default)
+#### Only spring.multirabbitmq (no default defined)
 This scenario is tricky and must be well understood, since the behavior of Spring will enforce the creation of the 
 default connection using **spring.rabbitmq** even when it's not provided. The same will happen here. The following 
 example will instantiate 3 connections, which one of them is the default, configured with default parameters. To use 
-any of the connections under **spring.multirabbitmq**, Rabbit context must be provided.
+any of the connections under **spring.multirabbitmq.connections**, the connection factory context must be provided.
 ```yaml
 spring:
     multirabbitmq:
-        connectionNameA:
-            host: localhost
-            port: 5673
-        connectionNameB:
-            host: localhost
-            port: 5674
+        connections:
+            connectionNameA:
+                host: localhost
+                port: 5673
+            connectionNameB:
+                host: localhost
+                port: 5674
 ```
 
 #### Only spring.multirabbitmq (one default present)
 This scenario is pretty straightforward, since there will be no implicit connection. In this case, there will exist 
-2 connections, and the connection **connectionNameA** can be accessed with or without Rabbit context. 
+2 connections, and the connection **connectionNameA** can be accessed with or without definition of context, since it's
+the default connection.
 ```yaml
 spring:
     multirabbitmq:
-        connectionNameA:
-            defaultConnection: true
-            host: localhost
-            port: 5673
-        connectionNameB:
-            host: localhost
-            port: 5674
+        defaultConnection: connectionNameA
+        connections:
+            connectionNameA:
+                host: localhost
+                port: 5673
+            connectionNameB:
+                host: localhost
+                port: 5674
 ```
 
 #### Both spring.rabbitmq and spring.multirabbitmq (no explicit default)
@@ -162,12 +166,13 @@ spring:
         host: localhost
         port: 5672
     multirabbitmq:
-        connectionNameA:
-            host: localhost
-            port: 5673
-        connectionNameB:
-            host: localhost
-            port: 5674
+        connections:
+            connectionNameA:
+                host: localhost
+                port: 5673
+            connectionNameB:
+                host: localhost
+                port: 5674
 ```
 
 #### Both spring.rabbitmq and spring.multirabbitmq (with one explicit default)
@@ -199,7 +204,7 @@ As listeners are defined, they will try to connect in 3 different addresses:
 * **localhost:5673**; 
 * **localhost:5674**.
 
-To easily provide RabbitMQ instances for the applications, you can create 3 Docker containers:
+To easily provide RabbitMQ connections for the applications, you can create 3 Docker containers:
 ```bash
 docker run -d -p 5672:5672 -p 15672:15672 rabbitmq:3-management; \
 docker run -d -p 5673:5672 -p 15673:15672 rabbitmq:3-management; \

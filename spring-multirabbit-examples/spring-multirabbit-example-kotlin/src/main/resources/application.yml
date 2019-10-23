@@ -3,9 +3,10 @@ spring:
         host: localhost
         port: 5672
     multirabbitmq:
-        connectionNameA:
-            host: localhost
-            port: 5673
-        connectionNameB:
-            host: localhost
-            port: 5674
+        connections:
+            connectionNameA:
+                host: localhost
+                port: 5673
+            connectionNameB:
+                host: localhost
+                port: 5674

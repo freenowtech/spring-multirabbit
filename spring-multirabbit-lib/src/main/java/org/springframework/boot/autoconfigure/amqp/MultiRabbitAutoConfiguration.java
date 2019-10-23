@@ -1,10 +1,8 @@
 package org.springframework.boot.autoconfigure.amqp;
 
 import com.rabbitmq.client.Channel;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -33,15 +31,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-
-import static java.util.stream.Collectors.toMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Class responsible for auto-configuring the necessary beans to enable multiple RabbitMQ servers.
+ *
+ * @author Wander Costa
  */
 @Configuration
 @ConditionalOnClass({RabbitTemplate.class, Channel.class})
-@EnableConfigurationProperties({RabbitProperties.class, MultiRabbitPropertiesMap.class})
+@EnableConfigurationProperties({RabbitProperties.class, MultiRabbitProperties.class})
 @Import({MultiRabbitBootstrapConfiguration.class, RabbitAnnotationDrivenConfiguration.class})
 public class MultiRabbitAutoConfiguration
 {
@@ -71,8 +70,6 @@ public class MultiRabbitAutoConfiguration
     protected static class MultiRabbitConnectionFactoryCreator implements BeanFactoryAware, ApplicationContextAware
     {
 
-        private static final String SUSPICIOUS_CONFIGURATION = "Potential issue with MultiRabbitMQ configuration: At least two ConnectionFactories were " +
-            "set as default: multirabbit connection '{}' and external configuration '{}'. Defining external configuration as the default.";
         private ConfigurableListableBeanFactory beanFactory;
         private ApplicationContext applicationContext;
         private final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator;
@@ -106,24 +103,15 @@ public class MultiRabbitAutoConfiguration
         @Primary
         @Bean(MultiRabbitConstants.CONNECTION_FACTORY_BEAN_NAME)
         public ConnectionFactory routingConnectionFactory(
-            RabbitProperties springRabbitProperties,
-            MultiRabbitPropertiesMap multiRabbitPropertiesMap,
+            RabbitProperties rabbitProperties,
+            MultiRabbitProperties multiRabbitProperties,
             MultiRabbitConnectionFactoryWrapper externalWrapper)
         {
-            MultiRabbitConnectionFactoryWrapper aggregatedWrapper = multiRabbitConnectionWrapper(springRabbitProperties, multiRabbitPropertiesMap);
-            externalWrapper.getConnectionFactories().keySet().forEach(key -> aggregatedWrapper.addConnectionFactory(
-                String.valueOf(key),
-                externalWrapper.getConnectionFactories().get(key),
-                externalWrapper.getContainerFactories().get(key),
-                externalWrapper.getRabbitAdmins().get(key)));
-            if (externalWrapper.getDefaultConnectionFactory() != null)
-            {
-                asStream(multiRabbitPropertiesMap)
-                    .filter(prop -> prop.getValue().isDefaultConnection())
-                    .findFirst()
-                    .ifPresent(prop -> LOGGER.warn(SUSPICIOUS_CONFIGURATION, prop.getKey(), externalWrapper.getDefaultConnectionFactory()));
-                aggregatedWrapper.setDefaultConnectionFactory(externalWrapper.getDefaultConnectionFactory());
-            }
+            final MultiRabbitConnectionFactoryWrapper internalWrapper
+                = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties);
+            final MultiRabbitConnectionFactoryWrapper aggregatedWrapper
+                = aggregateConnectionFactoryWrappers(internalWrapper, externalWrapper);
+
             aggregatedWrapper.getContainerFactories().forEach(this::registerContainerFactoryBean);
             aggregatedWrapper.getRabbitAdmins().forEach(this::registerRabbitAdminBean);
 
@@ -135,23 +123,78 @@ public class MultiRabbitAutoConfiguration
 
 
         /**
-         * Returns internal wrapper with default connection factories.
+         * Returns an aggregated view of two {@link MultiRabbitConnectionFactoryWrapper}, in which
+         * {@code externalWrapper} has higher precedence and will be preferred in case of clash of keys
+         * or in the presence of the default connection factory.
          */
-        private MultiRabbitConnectionFactoryWrapper multiRabbitConnectionWrapper(
-            RabbitProperties springRabbitProperties,
-            MultiRabbitPropertiesMap multiRabbitPropertiesMap)
+        private MultiRabbitConnectionFactoryWrapper aggregateConnectionFactoryWrappers(
+            final MultiRabbitConnectionFactoryWrapper internalWrapper,
+            final MultiRabbitConnectionFactoryWrapper externalWrapper)
         {
-            Map<String, ConnectionFactory> connectionFactoryMap = asStream(multiRabbitPropertiesMap)
-                .collect(toMap(Map.Entry::getKey, entry -> instantiateConnectionFactory(entry.getValue())));
+            final MultiRabbitConnectionFactoryWrapper aggregatedWrapper = new MultiRabbitConnectionFactoryWrapper();
+            copyConnectionSets(aggregatedWrapper, internalWrapper);
+            copyConnectionSets(aggregatedWrapper, externalWrapper);
 
-            MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
-            connectionFactoryMap.forEach((key, value) -> wrapper.addConnectionFactory(key, value, newContainerFactory(value), newRabbitAdmin(value)));
-            wrapper.setDefaultConnectionFactory(asStream(multiRabbitPropertiesMap)
-                .filter(prop -> prop.getValue().isDefaultConnection())
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .map(connectionFactoryMap::get)
-                .orElse(instantiateConnectionFactory(springRabbitProperties)));
+            aggregatedWrapper.setDefaultConnectionFactory(externalWrapper.getDefaultConnectionFactory() != null
+                ? externalWrapper.getDefaultConnectionFactory()
+                : internalWrapper.getDefaultConnectionFactory());
+            return aggregatedWrapper;
+        }
+
+
+        /**
+         * Copies the connection sets from a source wrapper to the aggregated wrapper.
+         */
+        private void copyConnectionSets(
+            final MultiRabbitConnectionFactoryWrapper aggregatedWrapper,
+            final MultiRabbitConnectionFactoryWrapper sourceWrapper)
+        {
+            sourceWrapper.getConnectionFactories().forEach((key, value) -> aggregatedWrapper.addConnectionFactory(
+                String.valueOf(key),
+                sourceWrapper.getConnectionFactories().get(key),
+                sourceWrapper.getContainerFactories().get(key),
+                sourceWrapper.getRabbitAdmins().get(key)));
+        }
+
+
+        /**
+         * Returns an internal wrapper with connection factories initialized.
+         */
+        private MultiRabbitConnectionFactoryWrapper instantiateConnectionFactories(
+            RabbitProperties rabbitProperties,
+            MultiRabbitProperties multiRabbitProperties)
+        {
+            final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
+
+            final Map<String, RabbitProperties> propertiesMap = multiRabbitProperties != null
+                ? multiRabbitProperties.getConnections()
+                : Collections.emptyMap();
+
+            propertiesMap.forEach((key, value) -> {
+                CachingConnectionFactory connectionFactory = instantiateConnectionFactory(value);
+                SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
+                RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
+                wrapper.addConnectionFactory(key, connectionFactory, containerFactory, rabbitAdmin);
+            });
+
+            final String defaultConnectionFactoryKey = multiRabbitProperties != null
+                ? multiRabbitProperties.getDefaultConnection()
+                : null;
+
+            if (StringUtils.hasText(defaultConnectionFactoryKey)
+                && !multiRabbitProperties.getConnections().containsKey(defaultConnectionFactoryKey))
+            {
+                String msg = String.format("MultiRabbitMQ broker '%s' set as default does " +
+                    "not exist in configuration", defaultConnectionFactoryKey);
+                LOGGER.error(msg);
+                throw new IllegalArgumentException(msg);
+            }
+
+            final ConnectionFactory defaultConnectionFactory = StringUtils.hasText(defaultConnectionFactoryKey)
+                ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
+                : instantiateConnectionFactory(rabbitProperties);
+            wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
+
             return wrapper;
         }
 
@@ -193,21 +236,6 @@ public class MultiRabbitAutoConfiguration
             {
                 throw new RuntimeException(ex);
             }
-        }
-
-
-        /**
-         * Null-safe method to return a {@link Stream} of the EntrySet of a {@link Map}.
-         *
-         * @param <T> The generic type of the expected map.
-         * @return A {@link Stream} with all elements from the {@link Map} or empty.
-         */
-        private static <T, U> Stream<Map.Entry<T, U>> asStream(final Map<T, U> map)
-        {
-            return Optional.ofNullable(map)
-                .map(Map::entrySet)
-                .map(Collection::stream)
-                .orElse(Stream.empty());
         }
 
 

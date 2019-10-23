@@ -13,6 +13,10 @@ import static org.springframework.util.Assert.notNull;
 
 /**
  * A wrapper of structures for RabbitMQ connections backed by a {@link HashMap}.
+ * This class is intended to offer an easy way to integrate with MultiRabbit
+ * by allowing an external library to plug in and provide factories.
+ *
+ * @author Wander Costa
  */
 public class MultiRabbitConnectionFactoryWrapper
 {

@@ -9,13 +9,17 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * An {@link ImportBeanDefinitionRegistrar} class that registers
- * a {@link ExtendedRabbitListenerAnnotationBeanPostProcessor} (overwriting the regular
+ * a {@link MultiRabbitListenerAnnotationBeanPostProcessor} (overwriting the regular
  * {@link RabbitListenerAnnotationBeanPostProcessor}) bean capable of processing
  * Spring's @{@link RabbitListener} annotation.
+ * Also register a default {@link RabbitListenerEndpointRegistry}.
+ *
+ * <p>This configuration class is automatically imported when using the @{@link EnableRabbit}
+ * annotation.
  *
  * @author Wander Costa
  *
- * @see ExtendedRabbitListenerAnnotationBeanPostProcessor
+ * @see MultiRabbitListenerAnnotationBeanPostProcessor
  * @see RabbitListenerAnnotationBeanPostProcessor
  * @see RabbitListenerEndpointRegistry
  * @see EnableRabbit
@@ -25,7 +29,7 @@ public class MultiRabbitBootstrapConfiguration implements ImportBeanDefinitionRe
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 			registry.registerBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
-					new RootBeanDefinition(ExtendedRabbitListenerAnnotationBeanPostProcessor.class));
+					new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
 	}
 
 }
