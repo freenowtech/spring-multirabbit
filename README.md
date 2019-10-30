@@ -185,13 +185,14 @@ spring:
         host: localhost
         port: 5672
     multirabbitmq:
-        connectionNameA:
-            defaultConnection: true
-            host: localhost
-            port: 5673
-        connectionNameB:
-            host: localhost
-            port: 5674
+        connections:
+            connectionNameA:
+                defaultConnection: true
+                host: localhost
+                port: 5672
+            connectionNameB:
+                host: localhost
+                port: 5672
 ```
 
 ## Compatibility of versions
