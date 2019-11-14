@@ -7,33 +7,26 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitAutoConfigurationTest
-{
+public class MultiRabbitAutoConfigurationTest {
 
     @Mock
     private ConnectionFactory connectionFactory;
 
-
-    private MultiRabbitAutoConfiguration config()
-    {
+    private MultiRabbitAutoConfiguration config() {
         return new MultiRabbitAutoConfiguration();
     }
 
-
     @Test
-    public void shouldInstantiateDefaultRabbitAdmin()
-    {
+    public void shouldInstantiateDefaultRabbitAdmin() {
         assertTrue(config().amqpAdmin(connectionFactory) instanceof RabbitAdmin);
     }
 
-
     @Test
-    public void shouldInstantiateRabbitConnectionFactoryCreator()
-    {
-        assertTrue(config().rabbitConnectionFactoryCreator() instanceof RabbitAutoConfiguration.RabbitConnectionFactoryCreator);
+    public void shouldInstantiateRabbitConnectionFactoryCreator() {
+        assertNotNull(config().rabbitConnectionFactoryCreator());
     }
-
 }

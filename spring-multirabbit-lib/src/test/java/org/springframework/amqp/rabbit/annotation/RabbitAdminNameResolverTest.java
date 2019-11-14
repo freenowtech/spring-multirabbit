@@ -13,8 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RabbitAdminNameResolverTest
-{
+public class RabbitAdminNameResolverTest {
 
     private static final String DUMMY_ADMIN = "dummy-admin";
     private static final String DUMMY_CONTAINER_FACTORY = "dummy-container-factory";
@@ -22,10 +21,8 @@ public class RabbitAdminNameResolverTest
     @Mock
     private RabbitListener listener;
 
-
     @Test
-    public void shouldResolveFromAdmin()
-    {
+    public void shouldResolveFromAdmin() {
         when(listener.admin()).thenReturn(DUMMY_ADMIN);
         assertEquals(DUMMY_ADMIN, RabbitAdminNameResolver.resolve(listener));
 
@@ -33,10 +30,8 @@ public class RabbitAdminNameResolverTest
         verify(listener, never()).containerFactory();
     }
 
-
     @Test
-    public void shouldResolveFromContainerFactoryWhenNoAdminIsAvailable()
-    {
+    public void shouldResolveFromContainerFactoryWhenNoAdminIsAvailable() {
         when(listener.containerFactory()).thenReturn(DUMMY_CONTAINER_FACTORY);
         String expected = DUMMY_CONTAINER_FACTORY + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
         assertEquals(expected, RabbitAdminNameResolver.resolve(listener));
@@ -45,14 +40,11 @@ public class RabbitAdminNameResolverTest
         verify(listener, atLeastOnce()).containerFactory();
     }
 
-
     @Test
-    public void shouldResolveFallbackToDefault()
-    {
+    public void shouldResolveFallbackToDefault() {
         assertEquals(MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME, RabbitAdminNameResolver.resolve(listener));
 
         verify(listener, atLeastOnce()).admin();
         verify(listener, atLeastOnce()).containerFactory();
     }
-
 }

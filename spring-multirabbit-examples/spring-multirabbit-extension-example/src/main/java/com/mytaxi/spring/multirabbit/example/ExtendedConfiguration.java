@@ -10,43 +10,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ExtendedConfiguration
-{
+public class ExtendedConfiguration {
 
     static final String EXTENDED_CONNECTION_A = "extendedConnectionNameA";
     static final String EXTENDED_CONNECTION_B = "extendedConnectionNameB";
 
-
     @Bean
-    public MultiRabbitConnectionFactoryWrapper externalWrapper()
-    {
-        ConnectionFactory connA = newConnectionFactory();
-        ConnectionFactory connB = newConnectionFactory();
-        MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
+    public MultiRabbitConnectionFactoryWrapper externalWrapper() {
+        final ConnectionFactory connA = newConnectionFactory();
+        final ConnectionFactory connB = newConnectionFactory();
+        final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
         wrapper.addConnectionFactory(EXTENDED_CONNECTION_A, connA, newContainerFactory(connA), newRabbitAdmin(connA));
         wrapper.addConnectionFactory(EXTENDED_CONNECTION_B, connB, newContainerFactory(connB), newRabbitAdmin(connB));
         wrapper.setDefaultConnectionFactory(connA);
         return wrapper;
     }
 
-
-    private ConnectionFactory newConnectionFactory()
-    {
+    private ConnectionFactory newConnectionFactory() {
         return new CachingConnectionFactory();
     }
 
-
-    private AbstractRabbitListenerContainerFactory newContainerFactory(ConnectionFactory connectionFactory)
-    {
-        SimpleRabbitListenerContainerFactory container = new SimpleRabbitListenerContainerFactory();
+    private AbstractRabbitListenerContainerFactory newContainerFactory(final ConnectionFactory connectionFactory) {
+        final SimpleRabbitListenerContainerFactory container = new SimpleRabbitListenerContainerFactory();
         container.setConnectionFactory(connectionFactory);
         return container;
     }
 
-
-    private RabbitAdmin newRabbitAdmin(ConnectionFactory connectionFactory)
-    {
+    private RabbitAdmin newRabbitAdmin(final ConnectionFactory connectionFactory) {
         return new RabbitAdmin(connectionFactory);
     }
-
 }
