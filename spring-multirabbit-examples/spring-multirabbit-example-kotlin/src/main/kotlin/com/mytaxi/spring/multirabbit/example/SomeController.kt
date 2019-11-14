@@ -33,7 +33,6 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
         }
     }
 
-
     /**
      * Sends a message using the default Spring implementation.
      */
@@ -55,7 +54,6 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
         }
     }
 
-
     /**
      * Sends a message using the context wrapper.
      */
@@ -70,9 +68,7 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
         })
     }
 
-
     private fun emptyIfNull(id: String?): String {
         return id ?: ""
     }
-
 }

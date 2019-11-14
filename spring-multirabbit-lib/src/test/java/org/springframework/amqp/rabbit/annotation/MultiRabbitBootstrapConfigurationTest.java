@@ -11,20 +11,19 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitBootstrapConfigurationTest
-{
+public class MultiRabbitBootstrapConfigurationTest {
 
-	private MultiRabbitBootstrapConfiguration configuration = new MultiRabbitBootstrapConfiguration();
+    private MultiRabbitBootstrapConfiguration configuration = new MultiRabbitBootstrapConfiguration();
 
-	@Mock
-	private BeanDefinitionRegistry registry;
+    @Mock
+    private BeanDefinitionRegistry registry;
 
-	@Test
-	public void shouldCreateMultiRabbitListenerAnnotationBeanPostProcessorBean()
-	{
-		configuration.registerBeanDefinitions(null, registry);
+    @Test
+    public void shouldCreateMultiRabbitListenerAnnotationBeanPostProcessorBean() {
+        configuration.registerBeanDefinitions(null, registry);
 
-		verify(registry).registerBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
-				new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
-	}
+        verify(registry).registerBeanDefinition(
+                RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
+                new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
+    }
 }

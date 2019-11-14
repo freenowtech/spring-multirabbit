@@ -23,17 +23,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @EnableRabbit
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ExternalConfigurationTest.Config.class)
-public class ExternalConfigurationTest
-{
+public class ExternalConfigurationTest {
 
     private static final String CONNECTION_KEY = "externalConnectionKey";
     private static final ConnectionFactory CONNECTION_FACTORY = mock(ConnectionFactory.class);
-    private static final SimpleRabbitListenerContainerFactory CONTAINER_FACTORY = mock(SimpleRabbitListenerContainerFactory.class);
+    private static final SimpleRabbitListenerContainerFactory CONTAINER_FACTORY
+            = mock(SimpleRabbitListenerContainerFactory.class);
     private static final RabbitAdmin RABBIT_ADMIN = mock(RabbitAdmin.class);
     private static final ConnectionFactory DEFAULT_CONNECTION_FACTORY = mock(ConnectionFactory.class);
 
@@ -43,37 +43,29 @@ public class ExternalConfigurationTest
     @Autowired
     private MultiRabbitProperties multiRabbitProperties;
 
-
     @After
-    public void after()
-    {
+    public void after() {
         // For the sake of simplicity, the mocks are static so as to be shared between classes.
         // Thus, they need to reset after using, to avoid interferences on the next test.
         reset(CONNECTION_FACTORY, CONTAINER_FACTORY, RABBIT_ADMIN);
     }
 
-
     @Test
-    public void shouldResolveDefaultExternalConnectionFactory()
-    {
+    public void shouldResolveDefaultExternalConnectionFactory() {
         connectionFactory.getVirtualHost();
         verify(DEFAULT_CONNECTION_FACTORY).getVirtualHost();
     }
 
-
     @Test
-    public void shouldResolveExternalConnectionFactory()
-    {
+    public void shouldResolveExternalConnectionFactory() {
         SimpleResourceHolder.bind(connectionFactory, CONNECTION_KEY);
         connectionFactory.getVirtualHost();
         SimpleResourceHolder.unbind(connectionFactory);
         verify(CONNECTION_FACTORY).getVirtualHost();
     }
 
-
     @Test
-    public void shouldResolveExistentConnectionFactoriesFromMulti()
-    {
+    public void shouldResolveExistentConnectionFactoriesFromMulti() {
         multiRabbitProperties.getConnections().keySet().forEach(key -> {
             SimpleResourceHolder.bind(connectionFactory, key);
             connectionFactory.getVirtualHost();
@@ -82,30 +74,23 @@ public class ExternalConfigurationTest
         assertMocksNotTouched();
     }
 
-
-    private void assertMocksNotTouched()
-    {
+    private void assertMocksNotTouched() {
         verify(CONNECTION_FACTORY, never()).getVirtualHost();
-        verifyZeroInteractions(CONTAINER_FACTORY);
-        verifyZeroInteractions(RABBIT_ADMIN);
+        verifyNoMoreInteractions(CONTAINER_FACTORY);
+        verifyNoMoreInteractions(RABBIT_ADMIN);
     }
-
 
     @Configuration
     @Import(MultiRabbitAutoConfiguration.class)
-    static class Config
-    {
+    static class Config {
 
         @Bean
         @ConditionalOnClass(MultiRabbitConnectionFactoryWrapper.class)
-        static MultiRabbitConnectionFactoryWrapper externalWrapper()
-        {
+        static MultiRabbitConnectionFactoryWrapper externalWrapper() {
             MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
             wrapper.addConnectionFactory(CONNECTION_KEY, CONNECTION_FACTORY, CONTAINER_FACTORY, RABBIT_ADMIN);
             wrapper.setDefaultConnectionFactory(DEFAULT_CONNECTION_FACTORY);
             return wrapper;
         }
-
     }
-
 }

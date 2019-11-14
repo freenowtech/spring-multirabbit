@@ -13,9 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class ApplicationTest
-{
-
+class ApplicationTest {
 
     @Autowired
     lateinit var connectionFactory: ConnectionFactory
@@ -23,19 +21,14 @@ class ApplicationTest
     @Autowired
     lateinit var rabbitListenerAnnotationBeanPostProcessor: RabbitListenerAnnotationBeanPostProcessor
 
-
     @Test
-    fun shouldLoadConnectionFactoryBean()
-    {
+    fun shouldLoadConnectionFactoryBean() {
         assertNotNull(connectionFactory)
         assertTrue(connectionFactory is SimpleRoutingConnectionFactory)
     }
 
-
     @Test
-    fun shouldLoadRabbitListenerAnnotationBeanPostProcessorBean()
-    {
+    fun shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
         assertNotNull(rabbitListenerAnnotationBeanPostProcessor)
     }
-
 }

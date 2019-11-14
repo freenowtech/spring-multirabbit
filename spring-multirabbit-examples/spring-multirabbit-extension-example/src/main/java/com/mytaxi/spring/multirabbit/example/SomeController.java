@@ -4,13 +4,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryContextWrapper;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.springframework.util.StringUtils.isEmpty;
-
 @RestController
-class SomeController
-{
+class SomeController {
 
     private static final String CONNECTION_PREFIX = "connectionName";
     private static final String EXCHANGE_NAME = "sampleExchange";
@@ -19,13 +17,10 @@ class SomeController
     private final RabbitTemplate rabbitTemplate;
     private final ConnectionFactoryContextWrapper contextWrapper;
 
-
-    SomeController(RabbitTemplate rabbitTemplate, ConnectionFactoryContextWrapper contextWrapper)
-    {
+    SomeController(final RabbitTemplate rabbitTemplate, final ConnectionFactoryContextWrapper contextWrapper) {
         this.rabbitTemplate = rabbitTemplate;
         this.contextWrapper = contextWrapper;
     }
-
 
     /**
      * An example of the use of RabbitTemplate, changing between different Rabbit connections.
@@ -34,22 +29,15 @@ class SomeController
      * @param id      The id of the connection as per defined in the configuration.
      */
     @PostMapping
-    void sendMessage(@RequestBody String message, String id)
-    {
-        String idWithPrefix = !isEmpty(id) ? CONNECTION_PREFIX + id : null;
+    void sendMessage(@RequestBody final String message,
+                     @RequestParam(defaultValue = "") final String id) {
+        String idWithPrefix = !id.isEmpty() ? CONNECTION_PREFIX + id : null;
         contextWrapper.run(idWithPrefix, () -> {
-            String exchange = EXCHANGE_NAME + emptyIfNull(id);
-            String routingKey = ROUTING_KEY + emptyIfNull(id);
+            String exchange = EXCHANGE_NAME + id;
+            String routingKey = ROUTING_KEY + id;
 
             // Regular use of RabbitTemplate
             rabbitTemplate.convertAndSend(exchange, routingKey, message);
         });
     }
-
-
-    private String emptyIfNull(String id)
-    {
-        return id != null ? id : "";
-    }
-
 }
