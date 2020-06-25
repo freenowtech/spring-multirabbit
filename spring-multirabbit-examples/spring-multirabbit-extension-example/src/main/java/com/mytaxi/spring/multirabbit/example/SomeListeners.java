@@ -13,6 +13,11 @@ class SomeListeners {
 
     private static final Logger LOG = LoggerFactory.getLogger(SomeListeners.class);
 
+    static final String CONNECTION_A = "connectionNameA";
+    static final String CONNECTION_B = "connectionNameB";
+    static final String EXTENDED_CONNECTION_A = "extendedConnectionNameA";
+    static final String EXTENDED_CONNECTION_B = "extendedConnectionNameB";
+
     private static final String SAMPLE_EXCHANGE = "sampleExchange";
     private static final String SAMPLE_ROUTING_KEY = "sampleRoutingKey";
     private static final String SAMPLE_QUEUE = "sampleQueue";
@@ -58,7 +63,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameA",
+    @RabbitListener(containerFactory = CONNECTION_A,
             bindings = @QueueBinding(
                     value = @Queue(SAMPLE_QUEUE_A),
                     exchange = @Exchange(SAMPLE_EXCHANGE_A),
@@ -73,7 +78,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameB",
+    @RabbitListener(containerFactory = CONNECTION_B,
             bindings = @QueueBinding(
                     value = @Queue(SAMPLE_QUEUE_B),
                     exchange = @Exchange(SAMPLE_EXCHANGE_B),
@@ -88,7 +93,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "extendedConnectionNameA", bindings = @QueueBinding(
+    @RabbitListener(containerFactory = EXTENDED_CONNECTION_A, bindings = @QueueBinding(
             value = @Queue(SAMPLE_EXT_QUEUE_A),
             exchange = @Exchange(SAMPLE_EXT_EXCHANGE_A),
             key = SAMPLE_EXT_ROUTING_KEY_A))
@@ -102,7 +107,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "extendedConnectionNameB", bindings = @QueueBinding(
+    @RabbitListener(containerFactory = EXTENDED_CONNECTION_B, bindings = @QueueBinding(
             value = @Queue(SAMPLE_EXT_QUEUE_B),
             exchange = @Exchange(SAMPLE_EXT_EXCHANGE_B),
             key = SAMPLE_EXT_ROUTING_KEY_B))

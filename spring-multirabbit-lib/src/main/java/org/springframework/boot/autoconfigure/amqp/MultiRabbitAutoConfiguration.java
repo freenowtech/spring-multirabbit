@@ -141,7 +141,7 @@ public class MultiRabbitAutoConfiguration {
             aggregatedWrapper.getContainerFactories().forEach(this::registerContainerFactoryBean);
             aggregatedWrapper.getRabbitAdmins().forEach(this::registerRabbitAdminBean);
 
-            SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
+            final SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
             connectionFactory.setTargetConnectionFactories(aggregatedWrapper.getConnectionFactories());
             connectionFactory.setDefaultTargetConnectionFactory(aggregatedWrapper.getDefaultConnectionFactory());
             return connectionFactory;

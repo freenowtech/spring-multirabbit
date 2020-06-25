@@ -13,6 +13,9 @@ class SomeListeners {
 
     private static final Logger LOG = LoggerFactory.getLogger(SomeListeners.class);
 
+    static final String CONNECTION_A = "connectionNameA";
+    static final String CONNECTION_B = "connectionNameB";
+
     private static final String SAMPLE_EXCHANGE = "sampleExchange";
     private static final String SAMPLE_ROUTING_KEY = "sampleRoutingKey";
     private static final String SAMPLE_QUEUE = "sampleQueue";
@@ -46,7 +49,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameA", bindings = @QueueBinding(
+    @RabbitListener(containerFactory = CONNECTION_A, bindings = @QueueBinding(
             value = @Queue(SAMPLE_QUEUE_A),
             exchange = @Exchange(SAMPLE_EXCHANGE_A),
             key = SAMPLE_ROUTING_KEY_A))
@@ -60,7 +63,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameB", bindings = @QueueBinding(
+    @RabbitListener(containerFactory = CONNECTION_B, bindings = @QueueBinding(
             value = @Queue(SAMPLE_QUEUE_B),
             exchange = @Exchange(SAMPLE_EXCHANGE_B),
             key = SAMPLE_ROUTING_KEY_B))

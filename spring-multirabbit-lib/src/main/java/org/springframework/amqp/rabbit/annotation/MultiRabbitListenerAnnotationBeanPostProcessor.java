@@ -4,9 +4,9 @@ import org.springframework.amqp.core.AbstractExchange;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Declarable;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -24,12 +24,14 @@ import java.lang.reflect.Method;
  */
 public final class MultiRabbitListenerAnnotationBeanPostProcessor
         extends RabbitListenerAnnotationBeanPostProcessor
-        implements ApplicationContextAware, BeanFactoryAware {
-
-    private static final String NO_ADMIN_BEAN_ERROR = "Bean '%s' for RabbitAdmin not found.";
+        implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-    private BeanFactory beanFactory;
+
+    // TODO Remove this workaround. It ensures the ConnectionFactory is ready when the listeners
+    //  are processed by MultiRabbitListenerAnnotationBeanPostProcessor.
+    @Autowired
+    private ConnectionFactory connectionFactory;
 
     @Override
     protected void processAmqpListener(final RabbitListener rabbitListener,
@@ -44,34 +46,22 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
      * Enhance beans with related RabbitAdmin, so as to be filtered when being processed by the RabbitAdmin.
      */
     private void enhanceBeansWithReferenceToRabbitAdmin(final RabbitListener rabbitListener) {
-        RabbitAdmin rabbitAdmin = getRabbitAdminBean(rabbitListener);
+        final String rabbitAdmin = RabbitAdminNameResolver.resolve(rabbitListener);
 
         // Enhance Exchanges
         applicationContext.getBeansOfType(AbstractExchange.class).values().stream()
                 .filter(this::isNotProcessed)
-                .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin));
 
         // Enhance Queues
         applicationContext.getBeansOfType(Queue.class).values().stream()
                 .filter(this::isNotProcessed)
-                .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin));
 
         // Enhance Bindings
         applicationContext.getBeansOfType(Binding.class).values().stream()
                 .filter(this::isNotProcessed)
-                .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
-    }
-
-    /**
-     * Returns the RabbitAdmin bean of the requested name or the default one.
-     */
-    private RabbitAdmin getRabbitAdminBean(final RabbitListener rabbitListener) {
-        String name = RabbitAdminNameResolver.resolve(rabbitListener);
-        RabbitAdmin rabbitAdmin = beanFactory.getBean(name, RabbitAdmin.class);
-        if (rabbitAdmin == null) {
-            throw new IllegalStateException(String.format(NO_ADMIN_BEAN_ERROR, name));
-        }
-        return rabbitAdmin;
+                .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin));
     }
 
     /**
@@ -81,12 +71,6 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         return declarable.getDeclaringAdmins() == null
                 || (declarable.getDeclaringAdmins().stream().noneMatch(item -> item == this)
                 && declarable.getDeclaringAdmins().stream().noneMatch(item -> item instanceof RabbitAdmin));
-    }
-
-    @Override
-    public void setBeanFactory(final BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-        super.setBeanFactory(beanFactory);
     }
 
     @Override

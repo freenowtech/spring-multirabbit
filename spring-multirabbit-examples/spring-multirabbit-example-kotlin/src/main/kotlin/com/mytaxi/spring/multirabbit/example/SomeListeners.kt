@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component
 class SomeListeners {
 
     companion object : KLogging() {
+        const val CONNECTION_A: String = "connectionNameA"
+        const val CONNECTION_B: String = "connectionNameB"
+
         const val SAMPLE_EXCHANGE: String = "sampleExchange"
         const val SAMPLE_ROUTING_KEY: String = "sampleRoutingKey"
         const val SAMPLE_QUEUE: String = "sampleQueue"
@@ -44,7 +47,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameA", bindings = [(QueueBinding(
+    @RabbitListener(containerFactory = CONNECTION_A, bindings = [(QueueBinding(
             value = Queue(SAMPLE_QUEUE_A),
             exchange = Exchange(SAMPLE_EXCHANGE_A),
             key = arrayOf(SAMPLE_ROUTING_KEY_A)))])
@@ -58,7 +61,7 @@ class SomeListeners {
      *
      * @param message the message received.
      */
-    @RabbitListener(containerFactory = "connectionNameB", bindings = [(QueueBinding(
+    @RabbitListener(containerFactory = CONNECTION_B, bindings = [(QueueBinding(
             value = Queue(SAMPLE_QUEUE_B),
             exchange = Exchange(SAMPLE_EXCHANGE_B),
             key = arrayOf(SAMPLE_ROUTING_KEY_B)))])

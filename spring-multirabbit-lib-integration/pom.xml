@@ -13,7 +13,7 @@
     <groupId>com.mytaxi.spring.multirabbit</groupId>
     <artifactId>spring-multirabbit-lib-integration</artifactId>
     <version>2.2.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Spring Multirabbit Library Integration Tests</name>
     <description>Module for integration tests with a running SpringBoot instance</description>
