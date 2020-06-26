@@ -8,11 +8,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 
 @Component
-class SomeListeners
-{
+class SomeListeners {
 
-    companion object : KLogging()
-    {
+    companion object : KLogging() {
         const val SAMPLE_EXCHANGE: String = "sampleExchange"
         const val SAMPLE_ROUTING_KEY: String = "sampleRoutingKey"
         const val SAMPLE_QUEUE: String = "sampleQueue"
@@ -36,11 +34,9 @@ class SomeListeners
             value = Queue(SAMPLE_QUEUE),
             exchange = Exchange(SAMPLE_EXCHANGE),
             key = arrayOf(SAMPLE_ROUTING_KEY)))])
-    fun listen(message: String)
-    {
+    fun listen(message: String) {
         logger.info("Default Listener: {}", message)
     }
-
 
     /**
      * Second listener, listening to the specific context 'connectionNameA', which is provided from the configuration
@@ -52,11 +48,9 @@ class SomeListeners
             value = Queue(SAMPLE_QUEUE_A),
             exchange = Exchange(SAMPLE_EXCHANGE_A),
             key = arrayOf(SAMPLE_ROUTING_KEY_A)))])
-    fun listenConnectionNameA(message: String)
-    {
+    fun listenConnectionNameA(message: String) {
         logger.info("Listener 'connectionNameA': {}", message)
     }
-
 
     /**
      * Third listener, listening to the specific context 'connectionNameB', which is provided from the configuration
@@ -68,9 +62,7 @@ class SomeListeners
             value = Queue(SAMPLE_QUEUE_B),
             exchange = Exchange(SAMPLE_EXCHANGE_B),
             key = arrayOf(SAMPLE_ROUTING_KEY_B)))])
-    fun listenConnectionNameB(message: String)
-    {
+    fun listenConnectionNameB(message: String) {
         logger.info("Listener 'connectionNameB': {}", message)
     }
-
 }

@@ -14,8 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitConnectionFactoryWrapperTest
-{
+public class MultiRabbitConnectionFactoryWrapperTest {
 
     private static final String DUMMY_KEY = "dummy-key";
 
@@ -31,36 +30,28 @@ public class MultiRabbitConnectionFactoryWrapperTest
     @Mock
     private RabbitAdmin rabbitAdmin;
 
-
-    public MultiRabbitConnectionFactoryWrapper wrapper()
-    {
+    public MultiRabbitConnectionFactoryWrapper wrapper() {
         return new MultiRabbitConnectionFactoryWrapper();
     }
 
-
     @Test
-    public void shouldGetDefaultConnectionFactory()
-    {
+    public void shouldGetDefaultConnectionFactory() {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.setDefaultConnectionFactory(connectionFactory);
 
         assertSame(connectionFactory, wrapper.getDefaultConnectionFactory());
     }
 
-
     @Test
-    public void shouldSetNullDefaultConnectionFactory()
-    {
+    public void shouldSetNullDefaultConnectionFactory() {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.setDefaultConnectionFactory(null);
 
         assertNull(wrapper.getDefaultConnectionFactory());
     }
 
-
     @Test
-    public void shouldAddConnectionFactory()
-    {
+    public void shouldAddConnectionFactory() {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory);
 
@@ -69,10 +60,8 @@ public class MultiRabbitConnectionFactoryWrapperTest
         assertNull(wrapper.getRabbitAdmins().get(DUMMY_KEY));
     }
 
-
     @Test
-    public void shouldAddConnectionFactoryWithContainerFactory()
-    {
+    public void shouldAddConnectionFactoryWithContainerFactory() {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory, containerFactory);
 
@@ -81,10 +70,8 @@ public class MultiRabbitConnectionFactoryWrapperTest
         assertNull(wrapper.getRabbitAdmins().get(DUMMY_KEY));
     }
 
-
     @Test
-    public void shouldAddConnectionFactoryWithContainerFactoryAndRabbitAdmin()
-    {
+    public void shouldAddConnectionFactoryWithContainerFactoryAndRabbitAdmin() {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory, containerFactory, rabbitAdmin);
 
@@ -93,22 +80,17 @@ public class MultiRabbitConnectionFactoryWrapperTest
         assertSame(rabbitAdmin, wrapper.getRabbitAdmins().get(DUMMY_KEY));
     }
 
-
     @Test
-    public void shouldNotAddNullConnectionFactory()
-    {
+    public void shouldNotAddNullConnectionFactory() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("ConnectionFactory may not be null");
         wrapper().addConnectionFactory(DUMMY_KEY, null, containerFactory, rabbitAdmin);
     }
 
-
     @Test
-    public void shouldNotAddConnectionFactoryWithEmptyKey()
-    {
+    public void shouldNotAddConnectionFactoryWithEmptyKey() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Key may not be null or empty");
         wrapper().addConnectionFactory("", connectionFactory, containerFactory, rabbitAdmin);
     }
-
 }

@@ -14,8 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ApplicationTest
-{
+public class ApplicationTest {
 
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -23,19 +22,14 @@ public class ApplicationTest
     @Autowired
     private RabbitListenerAnnotationBeanPostProcessor rabbitListenerAnnotationBeanPostProcessor;
 
-
     @Test
-    public void shouldLoadConnectionFactoryBean()
-    {
+    public void shouldLoadConnectionFactoryBean() {
         assertNotNull(connectionFactory);
         assertTrue(connectionFactory instanceof SimpleRoutingConnectionFactory);
     }
 
-
     @Test
-    public void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean()
-    {
+    public void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
         assertNotNull(rabbitListenerAnnotationBeanPostProcessor);
     }
-
 }
