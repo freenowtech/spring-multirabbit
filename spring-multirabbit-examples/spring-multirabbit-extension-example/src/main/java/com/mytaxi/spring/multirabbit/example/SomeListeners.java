@@ -13,6 +13,11 @@ class SomeListeners {
 
     private static final Logger LOG = LoggerFactory.getLogger(SomeListeners.class);
 
+    static final String CONNECTION_A = "connectionNameA";
+    static final String CONNECTION_B = "connectionNameB";
+    static final String EXTENDED_CONNECTION_A = "extendedConnectionNameA";
+    static final String EXTENDED_CONNECTION_B = "extendedConnectionNameB";
+
     private static final String SAMPLE_EXCHANGE = "sampleExchange";
     private static final String SAMPLE_ROUTING_KEY = "sampleRoutingKey";
     private static final String SAMPLE_QUEUE = "sampleQueue";
