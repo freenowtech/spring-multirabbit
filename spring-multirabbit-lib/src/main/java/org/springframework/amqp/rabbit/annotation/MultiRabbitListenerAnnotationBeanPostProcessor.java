@@ -28,8 +28,6 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
 
     private ApplicationContext applicationContext;
 
-    // TODO Remove this workaround. It ensures the ConnectionFactory is ready when the listeners
-    //  are processed by MultiRabbitListenerAnnotationBeanPostProcessor.
     @Autowired
     private ConnectionFactory connectionFactory;
 
