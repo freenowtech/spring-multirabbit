@@ -11,6 +11,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An extension of {@link RabbitListenerAnnotationBeanPostProcessor} that attaches the processing of beans for
@@ -48,18 +52,21 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
 
         // Enhance Exchanges
         applicationContext.getBeansOfType(AbstractExchange.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .filter(this::isNotProcessed)
+                          .filter(e -> shouldBeProcessed(e, rabbitListener))
+                          .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Queues
         applicationContext.getBeansOfType(Queue.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .filter(this::isNotProcessed)
+                          .filter(q -> shouldBeProcessed(q, rabbitListener))
+                          .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Bindings
         applicationContext.getBeansOfType(Binding.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .filter(this::isNotProcessed)
+                          .filter(b -> shouldBeProcessed(b, rabbitListener))
+                          .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
     }
 
     /**
@@ -68,7 +75,7 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
     private RabbitAdmin getRabbitAdminBean(final RabbitListener rabbitListener) {
         String name = RabbitAdminNameResolver.resolve(rabbitListener);
         RabbitAdmin rabbitAdmin = beanFactory.getBean(name, RabbitAdmin.class);
-        if (rabbitAdmin == null) {
+        if(rabbitAdmin == null) {
             throw new IllegalStateException(String.format(NO_ADMIN_BEAN_ERROR, name));
         }
         return rabbitAdmin;
@@ -79,9 +86,63 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
      */
     private boolean isNotProcessed(final Declarable declarable) {
         return declarable.getDeclaringAdmins() == null
-                || (declarable.getDeclaringAdmins().stream().noneMatch(item -> item == this)
-                && declarable.getDeclaringAdmins().stream().noneMatch(item -> item instanceof RabbitAdmin));
+               || (declarable.getDeclaringAdmins().stream().noneMatch(item -> item == this)
+                   && declarable.getDeclaringAdmins().stream().noneMatch(item -> item instanceof RabbitAdmin));
     }
+
+    private boolean shouldBeProcessed(final AbstractExchange exchange, final RabbitListener rabbitListener) {
+        return extractExchangeName(rabbitListener).contains(exchange.getName());
+    }
+
+    private Set<String> extractExchangeName(RabbitListener rabbitListener) {
+        if(rabbitListener.bindings().length > 0) {
+            return extractExchangeNameFromBindings(rabbitListener);
+        }
+        return Collections.emptySet();
+    }
+
+    private Set<String> extractExchangeNameFromBindings(RabbitListener rabbitListener) {
+        return Arrays.stream(rabbitListener.bindings())
+                     .filter(b -> b.declare().equals("true"))
+                     .map(b -> b.exchange().name())
+                     .collect(Collectors.toSet());
+    }
+
+    private boolean shouldBeProcessed(final Queue queue, final RabbitListener rabbitListener) {
+        return extractQueueName(rabbitListener).contains(queue.getName());
+    }
+
+    private Set<String> extractQueueName(RabbitListener rabbitListener) {
+        if(rabbitListener.bindings().length > 0) {
+            return extractQueueNameFromBindings(rabbitListener);
+        }
+        if(rabbitListener.queuesToDeclare().length > 0) {
+            return extractQueueNameFromQueues(rabbitListener);
+        }
+        return Collections.emptySet();
+    }
+
+    private Set<String> extractQueueNameFromBindings(RabbitListener rabbitListener) {
+        return Arrays.stream(rabbitListener.bindings())
+                     .filter(b -> b.declare().equals("true"))
+                     .map(b -> b.value().name())
+                     .collect(Collectors.toSet());
+    }
+
+    private Set<String> extractQueueNameFromQueues(RabbitListener rabbitListener) {
+        return Arrays.stream(rabbitListener.queuesToDeclare())
+                     .map(org.springframework.amqp.rabbit.annotation.Queue::name)
+                     .collect(Collectors.toSet());
+    }
+
+    private boolean shouldBeProcessed(final Binding binding, final RabbitListener rabbitListener) {
+        return Arrays.stream(rabbitListener.bindings())
+                     .filter(b -> b.declare().equals("true"))
+                     .filter(b -> b.exchange().name().equals(binding.getExchange()))
+                     .filter(b -> b.value().name().equals(binding.getDestination()))
+                     .anyMatch(b -> Arrays.stream(b.key()).anyMatch(k -> k.equals(binding.getRoutingKey())));
+    }
+
 
     @Override
     public void setBeanFactory(final BeanFactory beanFactory) {

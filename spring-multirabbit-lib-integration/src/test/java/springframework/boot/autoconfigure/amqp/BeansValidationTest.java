@@ -19,6 +19,8 @@ import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitConstants;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
@@ -30,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 @EnableRabbit
 @RunWith(SpringRunner.class)
 @SuppressWarnings("EmptyMethod")
-@SpringBootTest(classes = MultiRabbitAutoConfiguration.class)
+@SpringBootTest(classes = {MultiRabbitAutoConfiguration.class, BeansValidationTest.SharedArtifactsConfiguration.class})
 public class BeansValidationTest {
 
     private static final String CONNECTION_A = "connectionNameA";
@@ -53,10 +55,10 @@ public class BeansValidationTest {
     @Test
     public void shouldResolveContainerFactoryBeans() {
         List<String> beans = Arrays.asList(applicationContext
-                .getBeanNamesForType(SimpleRabbitListenerContainerFactory.class));
+                                                   .getBeanNamesForType(SimpleRabbitListenerContainerFactory.class));
         assertTrue(beans.containsAll(Arrays.asList("rabbitListenerContainerFactory", CONNECTION_A, CONNECTION_B)));
         beans.forEach(bean -> assertNotNull(applicationContext
-                .getBean(bean, SimpleRabbitListenerContainerFactory.class)));
+                                                    .getBean(bean, SimpleRabbitListenerContainerFactory.class)));
     }
 
     @Test
@@ -98,5 +100,33 @@ public class BeansValidationTest {
             exchange = @Exchange("exchange"),
             key = "key"))
     void listenConnectionNameB() {
+    }
+
+    @RabbitListener(containerFactory = CONNECTION_B, queues = "sharedQueue")
+    void listenConnectionNameC() {
+    }
+
+    @RabbitListener(containerFactory = CONNECTION_A, queues = "sharedQueue")
+    void listenConnectionNameD() {
+    }
+
+    @Configuration
+    static class SharedArtifactsConfiguration {
+
+        @Bean
+        org.springframework.amqp.core.Exchange sharedExchange() {
+            return org.springframework.amqp.core.ExchangeBuilder.directExchange("sharedExchange").build();
+        }
+
+        @Bean
+        org.springframework.amqp.core.Binding sharedBinding() {
+            return org.springframework.amqp.core.BindingBuilder.bind(sharedQueue()).to(sharedExchange()).with("key").noargs();
+        }
+
+        @Bean
+        org.springframework.amqp.core.Queue sharedQueue() {
+            return org.springframework.amqp.core.QueueBuilder.durable("sharedQueue").build();
+        }
+
     }
 }
