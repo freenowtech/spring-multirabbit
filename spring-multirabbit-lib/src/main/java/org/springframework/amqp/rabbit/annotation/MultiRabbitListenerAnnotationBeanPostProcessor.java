@@ -53,21 +53,21 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         // Enhance Exchanges
         applicationContext.getBeansOfType(AbstractExchange.class).values().stream()
                           .filter(this::isNotProcessed)
-//                          .filter(e -> shouldBeProcessed(e, rabbitListener))
+                          .filter(e -> shouldBeProcessed(e, rabbitListener))
                           .forEach(exchange -> exchange.setAdminsThatShouldDeclare(
                                   rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Queues
         applicationContext.getBeansOfType(Queue.class).values().stream()
                           .filter(this::isNotProcessed)
-//                          .filter(q -> shouldBeProcessed(q, rabbitListener))
+                          .filter(q -> shouldBeProcessed(q, rabbitListener))
                           .forEach(queue -> queue.setAdminsThatShouldDeclare(
                                   rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Bindings
         applicationContext.getBeansOfType(Binding.class).values().stream()
                           .filter(this::isNotProcessed)
-//                          .filter(b -> shouldBeProcessed(b, rabbitListener))
+                          .filter(b -> shouldBeProcessed(b, rabbitListener))
                           .forEach(binding -> binding.setAdminsThatShouldDeclare(
                                   rabbitAdmin != null ? rabbitAdmin : this));
     }
