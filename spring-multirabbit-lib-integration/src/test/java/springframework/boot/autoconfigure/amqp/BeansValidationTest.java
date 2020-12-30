@@ -102,12 +102,16 @@ public class BeansValidationTest {
     void listenConnectionNameB() {
     }
 
-    @RabbitListener(containerFactory = CONNECTION_B, queues = "sharedQueue")
+    @RabbitListener(queues = "sharedQueue")
     void listenConnectionNameC() {
     }
 
     @RabbitListener(containerFactory = CONNECTION_A, queues = "sharedQueue")
     void listenConnectionNameD() {
+    }
+
+    @RabbitListener(containerFactory = CONNECTION_B, queues = "sharedQueue")
+    void listenConnectionNameE() {
     }
 
     @Configuration
