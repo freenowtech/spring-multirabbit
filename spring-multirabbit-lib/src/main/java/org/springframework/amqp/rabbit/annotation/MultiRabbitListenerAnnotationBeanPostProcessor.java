@@ -54,19 +54,22 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         applicationContext.getBeansOfType(AbstractExchange.class).values().stream()
                           .filter(this::isNotProcessed)
                           .filter(e -> shouldBeProcessed(e, rabbitListener))
-                          .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .forEach(exchange -> exchange.setAdminsThatShouldDeclare(
+                                  rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Queues
         applicationContext.getBeansOfType(Queue.class).values().stream()
                           .filter(this::isNotProcessed)
                           .filter(q -> shouldBeProcessed(q, rabbitListener))
-                          .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .forEach(queue -> queue.setAdminsThatShouldDeclare(
+                                  rabbitAdmin != null ? rabbitAdmin : this));
 
         // Enhance Bindings
         applicationContext.getBeansOfType(Binding.class).values().stream()
                           .filter(this::isNotProcessed)
                           .filter(b -> shouldBeProcessed(b, rabbitListener))
-                          .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
+                          .forEach(binding -> binding.setAdminsThatShouldDeclare(
+                                  rabbitAdmin != null ? rabbitAdmin : this));
     }
 
     /**
@@ -75,7 +78,7 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
     private RabbitAdmin getRabbitAdminBean(final RabbitListener rabbitListener) {
         String name = RabbitAdminNameResolver.resolve(rabbitListener);
         RabbitAdmin rabbitAdmin = beanFactory.getBean(name, RabbitAdmin.class);
-        if(rabbitAdmin == null) {
+        if (rabbitAdmin == null) {
             throw new IllegalStateException(String.format(NO_ADMIN_BEAN_ERROR, name));
         }
         return rabbitAdmin;
@@ -94,14 +97,14 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         return extractExchangeName(rabbitListener).contains(exchange.getName());
     }
 
-    private Set<String> extractExchangeName(RabbitListener rabbitListener) {
-        if(rabbitListener.bindings().length > 0) {
+    private Set<String> extractExchangeName(final RabbitListener rabbitListener) {
+        if (rabbitListener.bindings().length > 0) {
             return extractExchangeNameFromBindings(rabbitListener);
         }
         return Collections.emptySet();
     }
 
-    private Set<String> extractExchangeNameFromBindings(RabbitListener rabbitListener) {
+    private Set<String> extractExchangeNameFromBindings(final RabbitListener rabbitListener) {
         return Arrays.stream(rabbitListener.bindings())
                      .filter(b -> b.declare().equals("true"))
                      .map(b -> b.exchange().name())
@@ -112,24 +115,24 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         return extractQueueName(rabbitListener).contains(queue.getName());
     }
 
-    private Set<String> extractQueueName(RabbitListener rabbitListener) {
-        if(rabbitListener.bindings().length > 0) {
+    private Set<String> extractQueueName(final RabbitListener rabbitListener) {
+        if (rabbitListener.bindings().length > 0) {
             return extractQueueNameFromBindings(rabbitListener);
         }
-        if(rabbitListener.queuesToDeclare().length > 0) {
+        if (rabbitListener.queuesToDeclare().length > 0) {
             return extractQueueNameFromQueues(rabbitListener);
         }
         return Collections.emptySet();
     }
 
-    private Set<String> extractQueueNameFromBindings(RabbitListener rabbitListener) {
+    private Set<String> extractQueueNameFromBindings(final RabbitListener rabbitListener) {
         return Arrays.stream(rabbitListener.bindings())
                      .filter(b -> b.declare().equals("true"))
                      .map(b -> b.value().name())
                      .collect(Collectors.toSet());
     }
 
-    private Set<String> extractQueueNameFromQueues(RabbitListener rabbitListener) {
+    private Set<String> extractQueueNameFromQueues(final RabbitListener rabbitListener) {
         return Arrays.stream(rabbitListener.queuesToDeclare())
                      .map(org.springframework.amqp.rabbit.annotation.Queue::name)
                      .collect(Collectors.toSet());
@@ -140,9 +143,9 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
                      .filter(b -> b.declare().equals("true"))
                      .filter(b -> b.exchange().name().equals(binding.getExchange()))
                      .filter(b -> b.value().name().equals(binding.getDestination()))
-                     .anyMatch(b -> Arrays.stream(b.key()).anyMatch(k -> k.equals(binding.getRoutingKey())));
+                     .anyMatch(b -> Arrays.stream(
+                             b.key()).anyMatch(k -> k.equals(binding.getRoutingKey())));
     }
-
 
     @Override
     public void setBeanFactory(final BeanFactory beanFactory) {

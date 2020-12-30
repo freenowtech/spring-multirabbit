@@ -115,17 +115,25 @@ public class BeansValidationTest {
 
         @Bean
         org.springframework.amqp.core.Exchange sharedExchange() {
-            return org.springframework.amqp.core.ExchangeBuilder.directExchange("sharedExchange").build();
+            return org.springframework.amqp.core.ExchangeBuilder
+                    .directExchange("sharedExchange")
+                    .build();
         }
 
         @Bean
         org.springframework.amqp.core.Binding sharedBinding() {
-            return org.springframework.amqp.core.BindingBuilder.bind(sharedQueue()).to(sharedExchange()).with("key").noargs();
+            return org.springframework.amqp.core.BindingBuilder
+                    .bind(sharedQueue())
+                    .to(sharedExchange())
+                    .with("key")
+                    .noargs();
         }
 
         @Bean
         org.springframework.amqp.core.Queue sharedQueue() {
-            return org.springframework.amqp.core.QueueBuilder.durable("sharedQueue").build();
+            return org.springframework.amqp.core.QueueBuilder
+                    .durable("sharedQueue")
+                    .build();
         }
 
     }
