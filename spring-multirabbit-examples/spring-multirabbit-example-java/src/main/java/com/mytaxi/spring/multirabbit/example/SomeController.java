@@ -5,9 +5,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryContextWrapper;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import static org.springframework.util.StringUtils.isEmpty;
 
 @RestController
 class SomeController {
@@ -34,8 +33,8 @@ class SomeController {
      *                          implementation.
      */
     @PostMapping
-    void sendMessage(final @RequestBody String message,
-                     final String id,
+    void sendMessage(@RequestBody final String message,
+                     @RequestParam(defaultValue = "") final String id,
                      final boolean useContextWrapper) {
         if (useContextWrapper) {
             sendMessageUsingContextWrapper(message, id);
@@ -49,19 +48,20 @@ class SomeController {
      */
     private void sendMessageTheDefaultWay(final String message, final String id) {
         // Binding to the right context of Rabbit ConnectionFactory
-        if (!isEmpty(id)) {
-            SimpleResourceHolder.bind(rabbitTemplate.getConnectionFactory(), CONNECTION_PREFIX + emptyIfNull(id));
+        if (!id.isEmpty()) {
+            SimpleResourceHolder.bind(rabbitTemplate.getConnectionFactory(), CONNECTION_PREFIX + id);
         }
 
-        final String exchange = EXCHANGE_NAME + emptyIfNull(id);
-        final String routingKey = ROUTING_KEY + emptyIfNull(id);
-
-        // Regular use of RabbitTemplate
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
-
-        // Unbinding the context of Rabbit ConnectionFactory
-        if (!isEmpty(id)) {
-            SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+        final String exchange = EXCHANGE_NAME + id;
+        final String routingKey = ROUTING_KEY + id;
+        try {
+            // Regular use of RabbitTemplate
+            rabbitTemplate.convertAndSend(exchange, routingKey, message);
+        } finally {
+            // Unbinding the context of Rabbit ConnectionFactory
+            if (!id.isEmpty()) {
+                SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+            }
         }
     }
 
@@ -69,17 +69,14 @@ class SomeController {
      * Sends a message using the context wrapper.
      */
     private void sendMessageUsingContextWrapper(final String message, final String id) {
-        final String idWithPrefix = !isEmpty(id) ? CONNECTION_PREFIX + id : null;
+        final String idWithPrefix = !id.isEmpty() ? CONNECTION_PREFIX + id : null;
+
         contextWrapper.run(idWithPrefix, () -> {
-            String exchange = EXCHANGE_NAME + emptyIfNull(id);
-            String routingKey = ROUTING_KEY + emptyIfNull(id);
+            String exchange = EXCHANGE_NAME + id;
+            String routingKey = ROUTING_KEY + id;
 
             // Regular use of RabbitTemplate
             rabbitTemplate.convertAndSend(exchange, routingKey, message);
         });
-    }
-
-    private String emptyIfNull(final String id) {
-        return id != null ? id : "";
     }
 }
