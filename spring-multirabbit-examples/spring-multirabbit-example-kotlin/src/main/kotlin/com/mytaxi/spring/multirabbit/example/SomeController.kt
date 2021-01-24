@@ -44,13 +44,14 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
 
         val exchange = EXCHANGE_NAME + emptyIfNull(id)
         val routingKey = ROUTING_KEY + emptyIfNull(id)
-
-        // Regular use of RabbitTemplate
-        rabbitTemplate.convertAndSend(exchange, routingKey, message)
-
-        // Unbinding the context of Rabbit ConnectionFactory
-        if (!isEmpty(id)) {
-            SimpleResourceHolder.unbind(rabbitTemplate.connectionFactory)
+        try {
+            // Regular use of RabbitTemplate
+            rabbitTemplate.convertAndSend(exchange, routingKey, message)
+        } finally {
+            // Unbinding the context of Rabbit ConnectionFactory
+            if (!isEmpty(id)) {
+                SimpleResourceHolder.unbind(rabbitTemplate.connectionFactory)
+            }
         }
     }
 

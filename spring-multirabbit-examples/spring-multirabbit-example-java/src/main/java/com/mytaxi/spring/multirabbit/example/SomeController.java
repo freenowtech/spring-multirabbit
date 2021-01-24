@@ -54,13 +54,14 @@ class SomeController {
 
         final String exchange = EXCHANGE_NAME + id;
         final String routingKey = ROUTING_KEY + id;
-
-        // Regular use of RabbitTemplate
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
-
-        // Unbinding the context of Rabbit ConnectionFactory
-        if (!id.isEmpty()) {
-            SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+        try {
+            // Regular use of RabbitTemplate
+            rabbitTemplate.convertAndSend(exchange, routingKey, message);
+        } finally {
+            // Unbinding the context of Rabbit ConnectionFactory
+            if (!id.isEmpty()) {
+                SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+            }
         }
     }
 
