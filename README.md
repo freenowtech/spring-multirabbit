@@ -73,8 +73,11 @@ private RabbitTemplate rabbitTemplate;
 
 void someMethod() {
     SimpleResourceHolder.bind(rabbitTemplate.getConnectionFactory(), "connectionNameA");
-    rabbitTemplate.convertAndSend("someExchange", "someRoutingKey", "someMessage"); // Use RabbitTemplate
-    SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+    try {
+        rabbitTemplate.convertAndSend("someExchange", "someRoutingKey", "someMessage"); // Use RabbitTemplate
+    } finally {
+        SimpleResourceHolder.unbind(rabbitTemplate.getConnectionFactory());
+    }
 }
 ```
 
