@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class AutoConfigInitializationTest {
 
     @Test
-    public void shouldStartContextWithoutRabbitTemplate() {
+    public void shouldStartContextWithoutConnectionFactory() {
         final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
                 ThreeBrokersConfig.class, RabbitAutoConfiguration.class, MultiRabbitAutoConfiguration.class,
                 ListenerBeans.class);
