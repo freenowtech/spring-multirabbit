@@ -1,16 +1,15 @@
 package org.springframework.amqp.rabbit.annotation;
 
-import org.springframework.amqp.core.AbstractExchange;
-import org.springframework.amqp.core.Binding;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import org.springframework.amqp.core.AbstractDeclarable;
 import org.springframework.amqp.core.Declarable;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.lang.reflect.Method;
+import org.springframework.util.StringUtils;
 
 /**
  * An extension of {@link RabbitListenerAnnotationBeanPostProcessor} that attaches the processing of beans for
@@ -24,54 +23,30 @@ import java.lang.reflect.Method;
  */
 public final class MultiRabbitListenerAnnotationBeanPostProcessor
         extends RabbitListenerAnnotationBeanPostProcessor
-        implements ApplicationContextAware, BeanFactoryAware {
-
-    private static final String NO_ADMIN_BEAN_ERROR = "Bean '%s' for RabbitAdmin not found.";
+        implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-    private BeanFactory beanFactory;
 
     @Override
     protected void processAmqpListener(final RabbitListener rabbitListener,
                                        final Method method,
                                        final Object bean,
                                        final String beanName) {
-        super.processAmqpListener(rabbitListener, method, bean, beanName);
-        enhanceBeansWithReferenceToRabbitAdmin(rabbitListener);
+        final String rabbitAdmin = RabbitAdminNameResolver.resolve(rabbitListener);
+        final RabbitListener rabbitListenerRef = proxyIfAdminNotPresent(rabbitListener, rabbitAdmin);
+        super.processAmqpListener(rabbitListenerRef, method, bean, beanName);
+        applicationContext.getBeansOfType(AbstractDeclarable.class).values().stream()
+                .filter(this::isNotProcessed)
+                .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin));
     }
 
-    /**
-     * Enhance beans with related RabbitAdmin, so as to be filtered when being processed by the RabbitAdmin.
-     */
-    private void enhanceBeansWithReferenceToRabbitAdmin(final RabbitListener rabbitListener) {
-        RabbitAdmin rabbitAdmin = getRabbitAdminBean(rabbitListener);
-
-        // Enhance Exchanges
-        applicationContext.getBeansOfType(AbstractExchange.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
-
-        // Enhance Queues
-        applicationContext.getBeansOfType(Queue.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(queue -> queue.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
-
-        // Enhance Bindings
-        applicationContext.getBeansOfType(Binding.class).values().stream()
-                .filter(this::isNotProcessed)
-                .forEach(binding -> binding.setAdminsThatShouldDeclare(rabbitAdmin != null ? rabbitAdmin : this));
-    }
-
-    /**
-     * Returns the RabbitAdmin bean of the requested name or the default one.
-     */
-    private RabbitAdmin getRabbitAdminBean(final RabbitListener rabbitListener) {
-        String name = RabbitAdminNameResolver.resolve(rabbitListener);
-        RabbitAdmin rabbitAdmin = beanFactory.getBean(name, RabbitAdmin.class);
-        if (rabbitAdmin == null) {
-            throw new IllegalStateException(String.format(NO_ADMIN_BEAN_ERROR, name));
+    private RabbitListener proxyIfAdminNotPresent(final RabbitListener rabbitListener, final String rabbitAdmin) {
+        if (StringUtils.hasText(rabbitListener.admin())) {
+            return rabbitListener;
         }
-        return rabbitAdmin;
+        return (RabbitListener) Proxy.newProxyInstance(
+                RabbitListener.class.getClassLoader(), new Class<?>[]{RabbitListener.class},
+                new RabbitListenerAdminReplacementInvocationHandler(rabbitListener, rabbitAdmin));
     }
 
     /**
@@ -84,13 +59,30 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
     }
 
     @Override
-    public void setBeanFactory(final BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-        super.setBeanFactory(beanFactory);
-    }
-
-    @Override
     public void setApplicationContext(final ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    /**
+     * An {@link InvocationHandler} to provide a replacing admin() parameter of the listener.
+     */
+    private final class RabbitListenerAdminReplacementInvocationHandler implements InvocationHandler {
+
+        private final RabbitListener target;
+        private final String admin;
+
+        private RabbitListenerAdminReplacementInvocationHandler(final RabbitListener target, final String admin) {
+            this.target = target;
+            this.admin = admin;
+        }
+
+        @Override
+        public Object invoke(final Object proxy, final Method method, final Object[] args)
+                throws InvocationTargetException, IllegalAccessException {
+            if (method.getName().equals("admin")) {
+                return this.admin;
+            }
+            return method.invoke(this.target, args);
+        }
     }
 }
