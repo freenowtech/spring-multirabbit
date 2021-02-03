@@ -5,7 +5,7 @@
 
     <groupId>com.mytaxi.spring.multirabbit</groupId>
     <artifactId>spring-multirabbit-parent</artifactId>
-    <version>2.1.5-SNAPSHOT</version>
+    <version>2.1.5</version>
     <packaging>pom</packaging>
 
     <name>Spring Multirabbit</name>
@@ -42,7 +42,7 @@
     </properties>
 
     <scm>
-        <tag>HEAD</tag>
+        <tag>spring-multirabbit-parent-2.1.5</tag>
         <url>scm:git:https://github.com/mytaxi/spring-multirabbit.git</url>
         <connection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</connection>
         <developerConnection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</developerConnection>
