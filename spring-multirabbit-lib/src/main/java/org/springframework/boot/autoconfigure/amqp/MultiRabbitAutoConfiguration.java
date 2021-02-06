@@ -132,16 +132,20 @@ public class MultiRabbitAutoConfiguration {
         public ConnectionFactory routingConnectionFactory(
                 final RabbitProperties rabbitProperties,
                 final MultiRabbitProperties multiRabbitProperties,
-                final MultiRabbitConnectionFactoryWrapper externalWrapper) {
+                final MultiRabbitConnectionFactoryWrapper externalWrapper) throws Exception {
             final MultiRabbitConnectionFactoryWrapper internalWrapper
                     = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties);
             final MultiRabbitConnectionFactoryWrapper aggregatedWrapper
                     = aggregateConnectionFactoryWrappers(internalWrapper, externalWrapper);
 
+            if (aggregatedWrapper.getDefaultConnectionFactory() == null) {
+                throw new IllegalArgumentException("A default ConnectionFactory must be provided.");
+            }
+
             aggregatedWrapper.getContainerFactories().forEach(this::registerContainerFactoryBean);
             aggregatedWrapper.getRabbitAdmins().forEach(this::registerRabbitAdminBean);
 
-            SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
+            final SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
             connectionFactory.setTargetConnectionFactories(aggregatedWrapper.getConnectionFactories());
             connectionFactory.setDefaultTargetConnectionFactory(aggregatedWrapper.getDefaultConnectionFactory());
             return connectionFactory;
@@ -183,19 +187,20 @@ public class MultiRabbitAutoConfiguration {
          */
         private MultiRabbitConnectionFactoryWrapper instantiateConnectionFactories(
                 final RabbitProperties rabbitProperties,
-                final MultiRabbitProperties multiRabbitProperties) {
+                final MultiRabbitProperties multiRabbitProperties) throws Exception {
             final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
 
             final Map<String, RabbitProperties> propertiesMap = multiRabbitProperties != null
                     ? multiRabbitProperties.getConnections()
                     : Collections.emptyMap();
 
-            propertiesMap.forEach((key, value) -> {
-                CachingConnectionFactory connectionFactory = instantiateConnectionFactory(value);
-                SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
-                RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
-                wrapper.addConnectionFactory(key, connectionFactory, containerFactory, rabbitAdmin);
-            });
+            for (Map.Entry<String, RabbitProperties> entry : propertiesMap.entrySet()) {
+                final CachingConnectionFactory connectionFactory
+                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), connectionNameStrategy);
+                final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
+                final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
+                wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
+            }
 
             final String defaultConnectionFactoryKey = multiRabbitProperties != null
                     ? multiRabbitProperties.getDefaultConnection()
@@ -211,7 +216,7 @@ public class MultiRabbitAutoConfiguration {
 
             final ConnectionFactory defaultConnectionFactory = StringUtils.hasText(defaultConnectionFactoryKey)
                     ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
-                    : instantiateConnectionFactory(rabbitProperties);
+                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
             wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
 
             return wrapper;
@@ -234,19 +239,6 @@ public class MultiRabbitAutoConfiguration {
             rabbitAdmin.setApplicationContext(applicationContext);
             rabbitAdmin.afterPropertiesSet();
             return rabbitAdmin;
-        }
-
-        /**
-         * Method to call default Spring factory creator and suppress a possible Exception into a RuntimeException. The
-         * suppression of the Exception will not affect the flow, since Spring will still stop its initialization in the
-         * event of any RuntimeException.
-         */
-        private CachingConnectionFactory instantiateConnectionFactory(final RabbitProperties rabbitProperties) {
-            try {
-                return springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
         }
 
         /**

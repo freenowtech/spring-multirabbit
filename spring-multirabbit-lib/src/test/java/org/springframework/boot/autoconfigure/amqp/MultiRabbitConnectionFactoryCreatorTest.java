@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -89,13 +90,16 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactory() {
+    public void shouldInstantiateRoutingConnectionFactory() throws Exception {
+        when(springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy))
+                .thenReturn(new CachingConnectionFactory());
+
         assertTrue(creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper)
                 instanceof RoutingConnectionFactory);
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithDefaultAndMultipleConnections() {
+    public void shouldInstantiateRoutingConnectionFactoryWithDefaultAndMultipleConnections() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -112,7 +116,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithOnlyDefaultConnectionFactory() {
+    public void shouldInstantiateRoutingConnectionFactoryWithOnlyDefaultConnectionFactory() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
 
         ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties,
@@ -123,10 +127,12 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithOnlyMultipleConnectionFactories() {
+    public void shouldInstantiateRoutingConnectionFactoryWithOnlyMultipleConnectionFactories() throws Exception {
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory0));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
+        when(springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy))
+                .thenReturn(new CachingConnectionFactory());
 
         ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties,
                 multiRabbitProperties, wrapper);
@@ -139,7 +145,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldReachDefaultConnectionFactoryWhenNotBound() {
+    public void shouldReachDefaultConnectionFactoryWhenNotBound() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -148,11 +154,11 @@ public class MultiRabbitConnectionFactoryCreatorTest {
         creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper).getVirtualHost();
 
         verify(connectionFactory0).getVirtualHost();
-        verifyNoMoreInteractions(connectionFactory1);
+        verify(connectionFactory1, never()).getVirtualHost();
     }
 
     @Test
-    public void shouldBindAndReachMultiConnectionFactory() {
+    public void shouldBindAndReachMultiConnectionFactory() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -165,12 +171,15 @@ public class MultiRabbitConnectionFactoryCreatorTest {
         routingConnectionFactory.getVirtualHost();
         SimpleResourceHolder.unbind(routingConnectionFactory);
 
-        verifyNoMoreInteractions(connectionFactory0);
+        verify(connectionFactory0, never()).getVirtualHost();
         verify(connectionFactory1).getVirtualHost();
     }
 
     @Test
-    public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultConnection() {
+    public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultConnection() throws Exception {
+        when(springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy))
+                .thenReturn(new CachingConnectionFactory());
+
         assertNotNull(creator().routingConnectionFactory(rabbitProperties, null, wrapper));
     }
 
@@ -181,6 +190,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
 
         MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
         multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
+        multiRabbitProperties.setDefaultConnection(DUMMY_KEY);
 
         creator().routingConnectionFactory(null, multiRabbitProperties, wrapper);
 
@@ -204,7 +214,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
 
     @Test
     public void shouldEncapsulateExceptionWhenFailingToCreateBean() throws Exception {
-        exception.expect(RuntimeException.class);
+        exception.expect(Exception.class);
         exception.expectMessage("mocked-exception");
 
         when(springFactoryCreator.rabbitConnectionFactory(any(RabbitProperties.class), eq(connectionNameStrategy)))
