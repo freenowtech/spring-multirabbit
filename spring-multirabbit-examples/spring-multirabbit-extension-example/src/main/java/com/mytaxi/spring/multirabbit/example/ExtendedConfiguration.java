@@ -14,6 +14,7 @@ public class ExtendedConfiguration {
 
     static final String EXTENDED_CONNECTION_A = "extendedConnectionNameA";
     static final String EXTENDED_CONNECTION_B = "extendedConnectionNameB";
+    static final int CONNECTION_TIMEOUT = 50;
 
     @Bean
     public MultiRabbitConnectionFactoryWrapper externalWrapper() {
@@ -27,7 +28,9 @@ public class ExtendedConfiguration {
     }
 
     private ConnectionFactory newConnectionFactory() {
-        return new CachingConnectionFactory();
+        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setConnectionTimeout(CONNECTION_TIMEOUT);
+        return connectionFactory;
     }
 
     private AbstractRabbitListenerContainerFactory newContainerFactory(final ConnectionFactory connectionFactory) {
