@@ -3,7 +3,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mytaxi.spring.multirabbit</groupId>
+    <groupId>com.freenowtech.spring.multirabbit</groupId>
     <artifactId>spring-multirabbit-parent</artifactId>
     <version>2.1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -11,7 +11,7 @@
     <name>Spring Multirabbit</name>
     <description>Library to extend Spring to provide connection to multiple RabbitMQ servers</description>
 
-    <url>http://www.mytaxi.com</url>
+    <url>http://www.free-now.com</url>
     <licenses>
         <license>
             <name>Apache License Version 2.0</name>
