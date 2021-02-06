@@ -42,16 +42,16 @@
     </properties>
 
     <scm>
+        <connection>scm:git:${project.scm.url}</connection>
+        <developerConnection>scm:git:${project.scm.url}</developerConnection>
+        <url>https://github.com/rwanderc/spring-multirabbit.git</url>
         <tag>HEAD</tag>
-        <url>scm:git:https://github.com/mytaxi/spring-multirabbit.git</url>
-        <connection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</connection>
-        <developerConnection>scm:git:https://github.com/mytaxi/spring-multirabbit.git</developerConnection>
     </scm>
     <distributionManagement>
         <repository>
-            <id>bintray-mytaxi-oss</id>
-            <name>mytaxi-oss</name>
-            <url>https://api.bintray.com/maven/mytaxi/oss/spring-multirabbit/;publish=1</url>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/rwanderc/spring-multirabbit</url>
         </repository>
     </distributionManagement>
 
@@ -78,6 +78,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
+                <configuration>
+                    <scmCommentPrefix>[ci skip] </scmCommentPrefix>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
