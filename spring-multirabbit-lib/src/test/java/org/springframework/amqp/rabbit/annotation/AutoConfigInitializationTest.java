@@ -1,6 +1,9 @@
 package org.springframework.amqp.rabbit.annotation;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -15,13 +18,16 @@ import org.springframework.stereotype.Component;
  * This test makes sure to test MultiRabbit without the injection of a RabbitTemplate as a workaround for the
  * initialization.
  */
-public class AutoConfigInitializationTest {
+class AutoConfigInitializationTest {
+
+    private static final int ADMINS = 3;
 
     @Test
-    public void shouldStartContextWithoutConnectionFactory() {
+    void shouldStartContextWithoutConnectionFactory() {
         final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-                ThreeBrokersConfig.class, RabbitAutoConfiguration.class, MultiRabbitAutoConfiguration.class,
+                ThreeBrokersConfig.class, MultiRabbitAutoConfiguration.class, RabbitAutoConfiguration.class,
                 ListenerBeans.class);
+        assertEquals(ADMINS, ctx.getBeansOfType(RabbitAdmin.class).size());
         ctx.close(); // Close and stop the listeners
     }
 
