@@ -11,12 +11,17 @@
     </parent>
 
     <groupId>com.free-now.multirabbit</groupId>
-    <artifactId>spring-multirabbit-example-java</artifactId>
+    <artifactId>spring-multirabbit-integration</artifactId>
     <version>2.3.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>Spring MultiRabbit Example for Java</name>
-    <description>Example module to showcase spring-multirabbit with Java</description>
+    <name>Spring MultiRabbit Library Integration Tests</name>
+    <description>Module for integration tests with a running SpringBoot instance</description>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 
     <dependencies>
         <dependency>

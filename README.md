@@ -1,7 +1,7 @@
 # Spring MultiRabbit
 **Spring MultiRabbit** is a library to enable multiple RabbitMQ brokers in SpringBoot applications. The modules are:
-* **spring-multirabbit-lib** - the main module, that provides the auto-configuration feature;
-* **spring-multirabbit-lib-integration** - a module to test integration with Spring;
+* **spring-multirabbit** - the main module, that provides the auto-configuration feature;
+* **spring-multirabbit-integration** - a module to test integration with Spring;
 * **spring-multirabbit-example-java** - an example project in Java;
 * **spring-multirabbit-example-kotlin** - an example project in Kotlin;
 * **spring-multirabbit-extension-example** - an example project of how to extend spring-multirabbit;
@@ -9,7 +9,7 @@
 ## How-to
 To use the library, the project must:
 1. Be a SpringBoot project annotated with **@EnableRabbit**, as usual;
-2. Import the library **spring-multirabbit-lib**;
+2. Import the library **spring-multirabbit**;
 3. Provide configuration for additional brokers in the new path **spring.multirabbitmq.connections**. All 
    attributes available for **spring.rabbitmq** can be used in **spring.multirabbitmq.connections**. 
 4. Change the container factory context when using non-default connections:
@@ -36,8 +36,8 @@ Add the reference to the repository, and the necessary libs:
         <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.free-now.spring.multirabbit</groupId>
-        <artifactId>spring-multirabbit-lib</artifactId>
+        <groupId>com.free-now.multirabbit</groupId>
+        <artifactId>spring-multirabbit</artifactId>
         <version>${multirabbit.version}</version>
     </dependency>
 </dependencies>
@@ -111,7 +111,7 @@ true**.
 
 #### Only spring.rabbitmq
 This is the most simple scenario where only one Rabbit server is needed. In this case, the application does not even 
-need the **spring-multirabbit-lib** library. No different behavior is expected and no need for Rabbit context change. 
+need the **spring-multirabbit** library. No different behavior is expected and no need for Rabbit context change.
 ```yaml
 spring:
     rabbitmq:
