@@ -1,6 +1,8 @@
 package org.springframework.boot.autoconfigure.amqp;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.impl.CredentialsProvider;
+import com.rabbitmq.client.impl.CredentialsRefreshService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -29,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -83,18 +86,30 @@ public class MultiRabbitAutoConfiguration {
         private ApplicationContext applicationContext;
         private final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator;
         private final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy;
+        private final ResourceLoader resourceLoader;
+        private final ObjectProvider<CredentialsProvider> credentialsProvider;
+        private final ObjectProvider<CredentialsRefreshService> credentialsRefreshService;
+
 
         /**
          * Creates a new MultiRabbitConnectionFactoryCreator for instantiation of beans.
-         *
          * @param springFactoryCreator   The RabbitConnectionFactoryCreator.
          * @param connectionNameStrategy The connection name strategy.
+         * @param resourceLoader The ResourceLoader.
+         * @param credentialsProvider The CredentialsProvider.
+         * @param credentialsRefreshService The CredentialsRefreshService.
          */
         MultiRabbitConnectionFactoryCreator(
-                final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator,
-                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) {
+            final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator,
+            final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy,
+            final ResourceLoader resourceLoader,
+            final ObjectProvider<CredentialsProvider> credentialsProvider,
+            final ObjectProvider<CredentialsRefreshService> credentialsRefreshService) {
             this.springFactoryCreator = springFactoryCreator;
             this.connectionNameStrategy = connectionNameStrategy;
+            this.resourceLoader = resourceLoader;
+            this.credentialsProvider = credentialsProvider;
+            this.credentialsRefreshService = credentialsRefreshService;
         }
 
         /**
@@ -126,6 +141,7 @@ public class MultiRabbitAutoConfiguration {
          * @param multiRabbitProperties The additional rabbit properties.
          * @param externalWrapper       The external wrapper for integration.
          * @return The routing connection factory.
+         * @throws IllegalArgumentException if default connection factory is not found.
          */
         @Primary
         @Bean(MultiRabbitConstants.CONNECTION_FACTORY_BEAN_NAME)
@@ -196,7 +212,8 @@ public class MultiRabbitAutoConfiguration {
 
             for (Map.Entry<String, RabbitProperties> entry : propertiesMap.entrySet()) {
                 final CachingConnectionFactory connectionFactory
-                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), connectionNameStrategy);
+                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), resourceLoader,
+                        credentialsProvider, credentialsRefreshService, connectionNameStrategy);
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
                 final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
                 wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
@@ -216,7 +233,8 @@ public class MultiRabbitAutoConfiguration {
 
             final ConnectionFactory defaultConnectionFactory = StringUtils.hasText(defaultConnectionFactoryKey)
                     ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
-                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
+                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader,
+                    credentialsProvider, credentialsRefreshService, connectionNameStrategy);
             wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
 
             return wrapper;

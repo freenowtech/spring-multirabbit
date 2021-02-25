@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import org.springframework.amqp.core.AbstractDeclarable;
 import org.springframework.amqp.core.Declarable;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -28,16 +29,17 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
     private ApplicationContext applicationContext;
 
     @Override
-    protected void processAmqpListener(final RabbitListener rabbitListener,
+    protected Collection<Declarable> processAmqpListener(final RabbitListener rabbitListener,
                                        final Method method,
                                        final Object bean,
                                        final String beanName) {
         final String rabbitAdmin = RabbitAdminNameResolver.resolve(rabbitListener);
         final RabbitListener rabbitListenerRef = proxyIfAdminNotPresent(rabbitListener, rabbitAdmin);
-        super.processAmqpListener(rabbitListenerRef, method, bean, beanName);
+        Collection<Declarable> declarables = super.processAmqpListener(rabbitListenerRef, method, bean, beanName);
         applicationContext.getBeansOfType(AbstractDeclarable.class).values().stream()
                 .filter(this::isNotProcessed)
                 .forEach(exchange -> exchange.setAdminsThatShouldDeclare(rabbitAdmin));
+        return declarables;
     }
 
     private RabbitListener proxyIfAdminNotPresent(final RabbitListener rabbitListener, final String rabbitAdmin) {
