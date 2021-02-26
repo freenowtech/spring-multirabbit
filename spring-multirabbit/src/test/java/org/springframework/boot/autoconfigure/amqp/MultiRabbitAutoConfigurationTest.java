@@ -1,17 +1,17 @@
 package org.springframework.boot.autoconfigure.amqp;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitAutoConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class MultiRabbitAutoConfigurationTest {
 
     @Mock
     private ConnectionFactory connectionFactory;
@@ -21,12 +21,12 @@ public class MultiRabbitAutoConfigurationTest {
     }
 
     @Test
-    public void shouldInstantiateDefaultRabbitAdmin() {
+    void shouldInstantiateDefaultRabbitAdmin() {
         assertTrue(config().amqpAdmin(connectionFactory) instanceof RabbitAdmin);
     }
 
     @Test
-    public void shouldInstantiateRabbitConnectionFactoryCreator() {
+    void shouldInstantiateRabbitConnectionFactoryCreator() {
         assertNotNull(config().rabbitConnectionFactoryCreator());
     }
 }

@@ -2,12 +2,10 @@ package org.springframework.boot.autoconfigure.amqp;
 
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -20,11 +18,12 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ResourceLoader;
-
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -32,13 +31,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitConnectionFactoryCreatorTest {
+@ExtendWith(MockitoExtension.class)
+class MultiRabbitConnectionFactoryCreatorTest {
 
     private static final String DUMMY_KEY = "dummy-key";
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Mock
     private ConfigurableListableBeanFactory beanFactory;
@@ -96,14 +92,14 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateExternalEmptyWrapper() {
+    void shouldInstantiateExternalEmptyWrapper() {
         MultiRabbitConnectionFactoryWrapper emptyWrapper = creator().externalEmptyWrapper();
         assertTrue(emptyWrapper.getConnectionFactories().isEmpty());
         assertNull(emptyWrapper.getDefaultConnectionFactory());
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactory() throws Exception {
+    void shouldInstantiateRoutingConnectionFactory() throws Exception {
         when(springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader, credentialsProvider,
             credentialsRefreshService, connectionNameStrategy)
         ).thenReturn(new CachingConnectionFactory());
@@ -112,7 +108,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithDefaultAndMultipleConnections() throws Exception {
+    void shouldInstantiateRoutingConnectionFactoryWithDefaultAndMultipleConnections() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -129,7 +125,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithOnlyDefaultConnectionFactory() throws Exception {
+    void shouldInstantiateRoutingConnectionFactoryWithOnlyDefaultConnectionFactory() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
 
         ConnectionFactory routingConnectionFactory = creator().routingConnectionFactory(rabbitProperties,
@@ -140,7 +136,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateRoutingConnectionFactoryWithOnlyMultipleConnectionFactories() throws Exception {
+    void shouldInstantiateRoutingConnectionFactoryWithOnlyMultipleConnectionFactories() throws Exception {
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory0));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
         when(wrapper.getRabbitAdmins()).thenReturn(singletonMap(DUMMY_KEY, rabbitAdmin));
@@ -159,7 +155,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldReachDefaultConnectionFactoryWhenNotBound() throws Exception {
+    void shouldReachDefaultConnectionFactoryWhenNotBound() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -172,7 +168,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldBindAndReachMultiConnectionFactory() throws Exception {
+    void shouldBindAndReachMultiConnectionFactory() throws Exception {
         when(wrapper.getDefaultConnectionFactory()).thenReturn(connectionFactory0);
         when(wrapper.getConnectionFactories()).thenReturn(singletonMap(DUMMY_KEY, connectionFactory1));
         when(wrapper.getContainerFactories()).thenReturn(singletonMap(DUMMY_KEY, containerFactory));
@@ -190,7 +186,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultConnection() throws Exception {
+    void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultConnection() throws Exception {
         when(springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader, credentialsProvider,
             credentialsRefreshService, connectionNameStrategy)
         ).thenReturn(new CachingConnectionFactory());
@@ -199,7 +195,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithMultipleConnections() throws Exception {
+    void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithMultipleConnections() throws Exception {
         when(springFactoryCreator.rabbitConnectionFactory(
             any(RabbitProperties.class),
             eq(resourceLoader),
@@ -219,7 +215,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultAndMultipleConnections()
+    void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultAndMultipleConnections()
         throws Exception {
         when(springFactoryCreator.rabbitConnectionFactory(
             any(RabbitProperties.class),
@@ -241,10 +237,7 @@ public class MultiRabbitConnectionFactoryCreatorTest {
     }
 
     @Test
-    public void shouldEncapsulateExceptionWhenFailingToCreateBean() throws Exception {
-        exception.expect(Exception.class);
-        exception.expectMessage("mocked-exception");
-
+    void shouldEncapsulateExceptionWhenFailingToCreateBean() throws Exception {
         when(springFactoryCreator.rabbitConnectionFactory(
             any(RabbitProperties.class),
             eq(resourceLoader),
@@ -253,9 +246,13 @@ public class MultiRabbitConnectionFactoryCreatorTest {
             eq(connectionNameStrategy))
         ).thenThrow(new Exception("mocked-exception"));
 
-        MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
-        multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
+        Exception exception = assertThrows(Exception.class, () -> {
+            MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
+            multiRabbitProperties.getConnections().put(DUMMY_KEY, secondaryRabbitProperties);
 
-        creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
+            creator().routingConnectionFactory(rabbitProperties, multiRabbitProperties, wrapper);
+        });
+
+        assertEquals("mocked-exception", exception.getMessage());
     }
 }

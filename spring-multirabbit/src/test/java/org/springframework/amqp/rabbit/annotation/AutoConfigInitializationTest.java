@@ -1,7 +1,5 @@
 package org.springframework.amqp.rabbit.annotation;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
@@ -10,6 +8,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * {@link MultiRabbitAutoConfiguration} is normally triggered before the processing of the Listeners by the

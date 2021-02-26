@@ -1,27 +1,21 @@
 package org.springframework.boot.autoconfigure.amqp;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-
 import java.util.concurrent.Callable;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConnectionFactoryContextWrapperTest {
+@ExtendWith(MockitoExtension.class)
+class ConnectionFactoryContextWrapperTest {
 
     private static final String DUMMY_CONTEXT_NAME = "dummy-context-name";
     private static final String DUMMY_RETURN = "dummy-return";
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
 
     @Mock
     private ConnectionFactory connectionFactory;
@@ -37,7 +31,7 @@ public class ConnectionFactoryContextWrapperTest {
     }
 
     @Test
-    public void shouldCall() throws Exception {
+    void shouldCall() throws Exception {
         when(callable.call()).thenReturn(DUMMY_RETURN);
 
         String result = wrapper().call(DUMMY_CONTEXT_NAME, callable);
@@ -47,17 +41,18 @@ public class ConnectionFactoryContextWrapperTest {
     }
 
     @Test
-    public void shouldNotSuppressExceptionWhenCalling() throws Exception {
-        exception.expect(RuntimeException.class);
-        exception.expectMessage("dummy-exception");
-
+    void shouldNotSuppressExceptionWhenCalling() throws Exception {
         when(callable.call()).thenThrow(new RuntimeException("dummy-exception"));
 
-        wrapper().call(DUMMY_CONTEXT_NAME, callable);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            wrapper().call(DUMMY_CONTEXT_NAME, callable);
+        });
+
+        assertEquals("dummy-exception", exception.getMessage());
     }
 
     @Test
-    public void shouldRun() throws Exception {
+    void shouldRun() {
         wrapper().run(DUMMY_CONTEXT_NAME, runnable);
 
         verify(runnable).run();
