@@ -3,15 +3,14 @@ name: Java CI with Maven
 on:
   push:
     branches:
-      - main
-      - release/**
+      - **
   pull_request:
     branches:
       - main
       - release/**
 
 jobs:
-  java8:
+  java:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,4 +23,5 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - run: java -version
+      - run: mvn -v
       - run: mvn -B verify --file pom.xml
