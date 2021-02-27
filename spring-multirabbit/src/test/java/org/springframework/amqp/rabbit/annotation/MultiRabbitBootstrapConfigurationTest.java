@@ -1,17 +1,17 @@
 package org.springframework.amqp.rabbit.annotation;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MultiRabbitBootstrapConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class MultiRabbitBootstrapConfigurationTest {
 
     private MultiRabbitBootstrapConfiguration configuration = new MultiRabbitBootstrapConfiguration();
 
@@ -19,7 +19,7 @@ public class MultiRabbitBootstrapConfigurationTest {
     private BeanDefinitionRegistry registry;
 
     @Test
-    public void shouldCreateMultiRabbitListenerAnnotationBeanPostProcessorBean() {
+    void shouldCreateMultiRabbitListenerAnnotationBeanPostProcessorBean() {
         configuration.registerBeanDefinitions(null, registry);
 
         verify(registry).registerBeanDefinition(

@@ -1,7 +1,7 @@
 package com.freenow.multirabbit.example;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -11,19 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitConstants;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.freenow.multirabbit.example.ExtendedConfiguration.EXTENDED_CONNECTION_A;
 import static com.freenow.multirabbit.example.ExtendedConfiguration.EXTENDED_CONNECTION_B;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
-public class ApplicationTest {
+@ExtendWith(SpringExtension.class)
+class ApplicationTest {
 
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -35,18 +35,18 @@ public class ApplicationTest {
     private ApplicationContext applicationContext;
 
     @Test
-    public void shouldLoadConnectionFactoryBean() {
+    void shouldLoadConnectionFactoryBean() {
         assertNotNull(connectionFactory);
         assertTrue(connectionFactory instanceof SimpleRoutingConnectionFactory);
     }
 
     @Test
-    public void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
+    void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
         assertNotNull(rabbitListenerAnnotationBeanPostProcessor);
     }
 
     @Test
-    public void shouldResolveContainerFactoryBeans() {
+    void shouldResolveContainerFactoryBeans() {
         List<String> beans = Arrays.asList(applicationContext
                 .getBeanNamesForType(SimpleRabbitListenerContainerFactory.class));
         assertTrue(beans.containsAll(Arrays.asList("rabbitListenerContainerFactory", EXTENDED_CONNECTION_A,
@@ -56,7 +56,7 @@ public class ApplicationTest {
     }
 
     @Test
-    public void shouldResolveRabbitAdminBeans() {
+    void shouldResolveRabbitAdminBeans() {
         List<String> beans = Arrays.asList(applicationContext.getBeanNamesForType(RabbitAdmin.class));
         assertTrue(beans.containsAll(Arrays.asList(
                 MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME,
