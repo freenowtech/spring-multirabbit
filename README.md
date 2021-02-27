@@ -1,4 +1,8 @@
 # Spring MultiRabbit
+
+[![Latest release](https://img.shields.io/github/release/freenowtech/spring-multirabbit.svg)](https://github.com/freenowtech/spring-multirabbit/releases/latest)
+![Build Status](https://github.com/freenowtech/spring-multirabbit/actions/workflows/maven.yml/badge.svg)
+
 **Spring MultiRabbit** is a library to enable multiple RabbitMQ brokers in SpringBoot applications. The modules are:
 * **spring-multirabbit-lib** - the main module, that provides the auto-configuration feature;
 * **spring-multirabbit-lib-integration** - a module to test integration with Spring;
