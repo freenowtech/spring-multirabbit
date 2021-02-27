@@ -111,7 +111,7 @@ public class MultiRabbitAutoConfiguration {
         /**
          * Returns the empty wrapper if non is provided.
          *
-         * @return  the empty wrapper if non is provided.
+         * @return the empty wrapper if non is provided.
          */
         @Bean
         @ConditionalOnMissingBean
@@ -126,6 +126,7 @@ public class MultiRabbitAutoConfiguration {
          * @param multiRabbitProperties The additional rabbit properties.
          * @param externalWrapper       The external wrapper for integration.
          * @return The routing connection factory.
+         * @throws Exception if found any issue to instantiate and register the beans.
          */
         @Primary
         @Bean(MultiRabbitConstants.CONNECTION_FACTORY_BEAN_NAME)

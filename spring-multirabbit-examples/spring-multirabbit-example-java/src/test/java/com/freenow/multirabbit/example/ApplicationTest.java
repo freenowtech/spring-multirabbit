@@ -1,20 +1,20 @@
 package com.freenow.multirabbit.example;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
-public class ApplicationTest {
+@ExtendWith(SpringExtension.class)
+class ApplicationTest {
 
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -23,13 +23,13 @@ public class ApplicationTest {
     private RabbitListenerAnnotationBeanPostProcessor rabbitListenerAnnotationBeanPostProcessor;
 
     @Test
-    public void shouldLoadConnectionFactoryBean() {
+    void shouldLoadConnectionFactoryBean() {
         assertNotNull(connectionFactory);
         assertTrue(connectionFactory instanceof SimpleRoutingConnectionFactory);
     }
 
     @Test
-    public void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
+    void shouldLoadRabbitListenerAnnotationBeanPostProcessorBean() {
         assertNotNull(rabbitListenerAnnotationBeanPostProcessor);
     }
 }

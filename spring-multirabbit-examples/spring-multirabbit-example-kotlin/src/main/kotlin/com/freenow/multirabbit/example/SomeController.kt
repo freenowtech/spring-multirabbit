@@ -3,7 +3,7 @@ package com.freenow.multirabbit.example
 import org.springframework.amqp.rabbit.connection.SimpleResourceHolder
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryContextWrapper
-import org.springframework.util.StringUtils.isEmpty
+import org.springframework.util.StringUtils.hasLength
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -38,7 +38,7 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
      */
     private fun sendMessageTheDefaultWay(message: String, id: String?) {
         // Binding to the right context of Rabbit ConnectionFactory
-        if (!isEmpty(id)) {
+        if (hasLength(id)) {
             SimpleResourceHolder.bind(rabbitTemplate.connectionFactory, CONNECTION_PREFIX + emptyIfNull(id))
         }
 
@@ -49,7 +49,7 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
             rabbitTemplate.convertAndSend(exchange, routingKey, message)
         } finally {
             // Unbinding the context of Rabbit ConnectionFactory
-            if (!isEmpty(id)) {
+            if (hasLength(id)) {
                 SimpleResourceHolder.unbind(rabbitTemplate.connectionFactory)
             }
         }
@@ -59,7 +59,7 @@ class SomeController(var rabbitTemplate: RabbitTemplate,
      * Sends a message using the context wrapper.
      */
     private fun sendMessageUsingContextWrapper(message: String, id: String?) {
-        val idWithPrefix = if (!isEmpty(id)) CONNECTION_PREFIX + id else null
+        val idWithPrefix = if (hasLength(id)) CONNECTION_PREFIX + id else null
         contextWrapper.run(idWithPrefix, {
             val exchange = EXCHANGE_NAME + emptyIfNull(id)
             val routingKey = ROUTING_KEY + emptyIfNull(id)
