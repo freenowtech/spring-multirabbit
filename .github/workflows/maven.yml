@@ -5,13 +5,15 @@ on:
     branches:
       - main
       - release/**
+      - develop/**
   pull_request:
     branches:
       - main
       - release/**
+      - develop/**
 
 jobs:
-  java8:
+  java:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,4 +26,5 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - run: java -version
+      - run: mvn -v
       - run: mvn -B verify --file pom.xml
