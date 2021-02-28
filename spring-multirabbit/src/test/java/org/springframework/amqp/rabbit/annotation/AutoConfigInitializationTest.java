@@ -1,5 +1,6 @@
 package org.springframework.amqp.rabbit.annotation;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
@@ -18,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This test makes sure to test MultiRabbit without the injection of a RabbitTemplate as a workaround for the
  * initialization.
  */
+// TODO https://github.com/freenowtech/spring-multirabbit/issues/49
+@Disabled
 class AutoConfigInitializationTest {
 
     private static final int ADMINS = 3;
