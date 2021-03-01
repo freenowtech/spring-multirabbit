@@ -28,4 +28,6 @@ jobs:
           architecture: x64
       - run: java -version
       - run: mvn -v
-      - run: mvn -B verify
+      - run: mvn -B -U clean verify
+
+
