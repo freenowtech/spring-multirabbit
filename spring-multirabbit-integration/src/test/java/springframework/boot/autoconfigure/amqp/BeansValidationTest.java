@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
+import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
@@ -68,7 +69,7 @@ class BeansValidationTest {
     void shouldResolveRabbitAdminBeans() {
         List<String> beans = Arrays.asList(applicationContext.getBeanNamesForType(RabbitAdmin.class));
         assertTrue(beans.containsAll(Arrays.asList(
-                MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME,
+                RabbitListenerConfigUtils.RABBIT_ADMIN_BEAN_NAME,
                 CONNECTION_A + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
                 CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX)));
         beans.forEach(bean -> assertNotNull(applicationContext.getBean(bean, RabbitAdmin.class)));

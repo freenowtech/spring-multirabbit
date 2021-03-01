@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -56,7 +57,7 @@ public class MultiRabbitAutoConfiguration {
      * @param connectionFactory The {@link ConnectionFactory} to be associated to.
      * @return an {@link AmqpAdmin}.
      */
-    @Bean(MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME)
+    @Bean(RabbitListenerConfigUtils.RABBIT_ADMIN_BEAN_NAME)
     @Primary
     @ConditionalOnSingleCandidate(ConnectionFactory.class)
     @ConditionalOnProperty(prefix = "spring.rabbitmq", name = "dynamic", matchIfMissing = true)

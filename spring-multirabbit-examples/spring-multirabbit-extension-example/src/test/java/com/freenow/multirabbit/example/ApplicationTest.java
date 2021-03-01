@@ -3,6 +3,7 @@ package com.freenow.multirabbit.example;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
+import org.springframework.amqp.rabbit.config.RabbitListenerConfigUtils;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SimpleRoutingConnectionFactory;
@@ -59,7 +60,7 @@ class ApplicationTest {
     void shouldResolveRabbitAdminBeans() {
         List<String> beans = Arrays.asList(applicationContext.getBeanNamesForType(RabbitAdmin.class));
         assertTrue(beans.containsAll(Arrays.asList(
-                MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME,
+                RabbitListenerConfigUtils.RABBIT_ADMIN_BEAN_NAME,
                 EXTENDED_CONNECTION_A + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
                 EXTENDED_CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX)));
         beans.forEach(bean -> assertNotNull(applicationContext.getBean(bean, RabbitAdmin.class)));
