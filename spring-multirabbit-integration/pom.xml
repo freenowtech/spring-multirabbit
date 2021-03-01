@@ -13,7 +13,7 @@
     <groupId>com.free-now.multirabbit</groupId>
     <artifactId>spring-multirabbit-integration</artifactId>
     <version>2.3.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Spring MultiRabbit Library Integration Tests</name>
     <description>Module for integration tests with a running SpringBoot instance</description>

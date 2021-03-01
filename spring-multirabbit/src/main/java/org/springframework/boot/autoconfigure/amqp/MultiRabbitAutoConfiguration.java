@@ -141,7 +141,7 @@ public class MultiRabbitAutoConfiguration {
          * @param multiRabbitProperties The additional rabbit properties.
          * @param externalWrapper       The external wrapper for integration.
          * @return The routing connection factory.
-         * @throws IllegalArgumentException if default connection factory is not found.
+         * @throws Exception (IllegalArgumentException) if default connection factory is not found.
          */
         @Primary
         @Bean(MultiRabbitConstants.CONNECTION_FACTORY_BEAN_NAME)
