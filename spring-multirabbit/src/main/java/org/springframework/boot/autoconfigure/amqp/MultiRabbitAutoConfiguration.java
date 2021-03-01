@@ -126,7 +126,7 @@ public class MultiRabbitAutoConfiguration {
         /**
          * Returns the empty wrapper if non is provided.
          *
-         * @return  the empty wrapper if non is provided.
+         * @return the empty wrapper if non is provided.
          */
         @Bean
         @ConditionalOnMissingBean

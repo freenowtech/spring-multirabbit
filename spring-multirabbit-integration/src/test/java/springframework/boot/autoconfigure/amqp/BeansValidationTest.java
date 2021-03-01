@@ -1,6 +1,7 @@
 package springframework.boot.autoconfigure.amqp;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitListenerAnnotationBeanPostProcessor;
@@ -18,6 +19,8 @@ import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitConstants;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnableRabbit
+@ExtendWith(SpringExtension.class)
+@SuppressWarnings("EmptyMethod")
 @SpringBootTest(classes = MultiRabbitAutoConfiguration.class)
 class BeansValidationTest {
 

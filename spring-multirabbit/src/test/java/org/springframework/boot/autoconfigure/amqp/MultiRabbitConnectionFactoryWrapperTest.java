@@ -2,12 +2,13 @@ package org.springframework.boot.autoconfigure.amqp;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,7 +27,7 @@ class MultiRabbitConnectionFactoryWrapperTest {
     @Mock
     private RabbitAdmin rabbitAdmin;
 
-    public MultiRabbitConnectionFactoryWrapper wrapper() {
+    private MultiRabbitConnectionFactoryWrapper wrapper() {
         return new MultiRabbitConnectionFactoryWrapper();
     }
 
@@ -78,19 +79,15 @@ class MultiRabbitConnectionFactoryWrapperTest {
 
     @Test
     void shouldNotAddNullConnectionFactory() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            wrapper().addConnectionFactory(DUMMY_KEY, null, containerFactory, rabbitAdmin);
-        });
-
-        assertEquals("ConnectionFactory may not be null", exception.getMessage());
+        final Executable executable =
+                () -> wrapper().addConnectionFactory(DUMMY_KEY, null, containerFactory, rabbitAdmin);
+        assertThrows(IllegalArgumentException.class, executable, "ConnectionFactory may not be null");
     }
 
     @Test
     void shouldNotAddConnectionFactoryWithEmptyKey() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            wrapper().addConnectionFactory("", connectionFactory, containerFactory, rabbitAdmin);
-        });
-
-        assertEquals("Key may not be null or empty", exception.getMessage());
+        final Executable executable =
+                () -> wrapper().addConnectionFactory("", connectionFactory, containerFactory, rabbitAdmin);
+        assertThrows(IllegalArgumentException.class, executable, "Key may not be null or empty");
     }
 }

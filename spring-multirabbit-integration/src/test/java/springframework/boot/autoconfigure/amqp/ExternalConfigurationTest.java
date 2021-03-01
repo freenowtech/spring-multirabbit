@@ -2,6 +2,7 @@ package springframework.boot.autoconfigure.amqp;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,8 +26,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @EnableRabbit
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = ExternalConfigurationTest.Config.class)
-public class ExternalConfigurationTest {
+class ExternalConfigurationTest {
 
     private static final String CONNECTION_KEY = "externalConnectionKey";
     private static final ConnectionFactory CONNECTION_FACTORY = mock(ConnectionFactory.class);
@@ -42,7 +45,7 @@ public class ExternalConfigurationTest {
 
     @AfterEach
     void after() {
-        // For the sake of simplicity, the mocks are static so as to be shared between classes.
+        // For the sake of simplicity, the mocks are static so as to be shared among classes.
         // Thus, they need to reset after using, to avoid interferences on the next test.
         reset(CONNECTION_FACTORY, CONTAINER_FACTORY, RABBIT_ADMIN);
     }

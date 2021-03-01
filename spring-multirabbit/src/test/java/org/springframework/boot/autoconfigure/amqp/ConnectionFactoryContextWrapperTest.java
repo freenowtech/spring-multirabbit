@@ -5,7 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+
 import java.util.concurrent.Callable;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -42,17 +44,14 @@ class ConnectionFactoryContextWrapperTest {
 
     @Test
     void shouldNotSuppressExceptionWhenCalling() throws Exception {
-        when(callable.call()).thenThrow(new RuntimeException("dummy-exception"));
+        final RuntimeException ex = new RuntimeException("dummy-exception");
+        when(callable.call()).thenThrow(ex);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            wrapper().call(DUMMY_CONTEXT_NAME, callable);
-        });
-
-        assertEquals("dummy-exception", exception.getMessage());
+        assertThrows(ex.getClass(), () -> wrapper().call(DUMMY_CONTEXT_NAME, callable), ex.getMessage());
     }
 
     @Test
-    void shouldRun() {
+    void shouldRun() throws Exception {
         wrapper().run(DUMMY_CONTEXT_NAME, runnable);
 
         verify(runnable).run();
