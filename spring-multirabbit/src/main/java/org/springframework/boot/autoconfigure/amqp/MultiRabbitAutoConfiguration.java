@@ -1,6 +1,10 @@
 package org.springframework.boot.autoconfigure.amqp;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.impl.CredentialsProvider;
+import com.rabbitmq.client.impl.CredentialsRefreshService;
+import java.util.Collections;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpAdmin;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.RabbitConnectionFactoryCreator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,10 +34,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
-
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Class responsible for auto-configuring the necessary beans to enable multiple RabbitMQ servers.
@@ -62,14 +65,14 @@ public class MultiRabbitAutoConfiguration {
     }
 
     /**
-     * Returns a {@link RabbitAutoConfiguration.RabbitConnectionFactoryCreator}.
+     * Returns a {@link RabbitConnectionFactoryCreator}.
      *
-     * @return a {@link RabbitAutoConfiguration.RabbitConnectionFactoryCreator}.
+     * @return a {@link RabbitConnectionFactoryCreator}.
      */
     @Primary
     @Bean(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME)
-    public RabbitAutoConfiguration.RabbitConnectionFactoryCreator rabbitConnectionFactoryCreator() {
-        return new RabbitAutoConfiguration.RabbitConnectionFactoryCreator();
+    public RabbitConnectionFactoryCreator rabbitConnectionFactoryCreator() {
+        return new RabbitConnectionFactoryCreator();
     }
 
     /**
@@ -77,24 +80,20 @@ public class MultiRabbitAutoConfiguration {
      */
     @Configuration
     @DependsOn(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME)
+    @ConditionalOnProperty(prefix = "spring.multirabbitmq", name = "enabled", havingValue = "true")
     protected static class MultiRabbitConnectionFactoryCreator implements BeanFactoryAware, ApplicationContextAware {
 
         private ConfigurableListableBeanFactory beanFactory;
         private ApplicationContext applicationContext;
-        private final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator;
-        private final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy;
+        private final RabbitConnectionFactoryCreator springFactoryCreator;
 
         /**
          * Creates a new MultiRabbitConnectionFactoryCreator for instantiation of beans.
          *
-         * @param springFactoryCreator   The RabbitConnectionFactoryCreator.
-         * @param connectionNameStrategy The connection name strategy.
+         * @param springFactoryCreator The RabbitConnectionFactoryCreator.
          */
-        MultiRabbitConnectionFactoryCreator(
-                final RabbitAutoConfiguration.RabbitConnectionFactoryCreator springFactoryCreator,
-                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) {
+        MultiRabbitConnectionFactoryCreator(final RabbitConnectionFactoryCreator springFactoryCreator) {
             this.springFactoryCreator = springFactoryCreator;
-            this.connectionNameStrategy = connectionNameStrategy;
         }
 
         /**
@@ -104,6 +103,7 @@ public class MultiRabbitAutoConfiguration {
          * @return The wrapper.
          */
         @Bean
+        @ConditionalOnMissingBean
         public ConnectionFactoryContextWrapper contextWrapper(final ConnectionFactory connectionFactory) {
             return new ConnectionFactoryContextWrapper(connectionFactory);
         }
@@ -133,9 +133,14 @@ public class MultiRabbitAutoConfiguration {
         public ConnectionFactory routingConnectionFactory(
                 final RabbitProperties rabbitProperties,
                 final MultiRabbitProperties multiRabbitProperties,
-                final MultiRabbitConnectionFactoryWrapper externalWrapper) throws Exception {
+                final MultiRabbitConnectionFactoryWrapper externalWrapper,
+                final ResourceLoader resourceLoader,
+                final ObjectProvider<CredentialsProvider> credentialsProvider,
+                final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
+                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) throws Exception {
             final MultiRabbitConnectionFactoryWrapper internalWrapper
-                    = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties);
+                    = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties, resourceLoader,
+                    credentialsProvider, credentialsRefreshService, connectionNameStrategy);
             final MultiRabbitConnectionFactoryWrapper aggregatedWrapper
                     = aggregateConnectionFactoryWrappers(internalWrapper, externalWrapper);
 
@@ -188,7 +193,11 @@ public class MultiRabbitAutoConfiguration {
          */
         private MultiRabbitConnectionFactoryWrapper instantiateConnectionFactories(
                 final RabbitProperties rabbitProperties,
-                final MultiRabbitProperties multiRabbitProperties) throws Exception {
+                final MultiRabbitProperties multiRabbitProperties,
+                final ResourceLoader resourceLoader,
+                final ObjectProvider<CredentialsProvider> credentialsProvider,
+                final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
+                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) throws Exception {
             final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
 
             final Map<String, RabbitProperties> propertiesMap = multiRabbitProperties != null
@@ -197,7 +206,8 @@ public class MultiRabbitAutoConfiguration {
 
             for (Map.Entry<String, RabbitProperties> entry : propertiesMap.entrySet()) {
                 final CachingConnectionFactory connectionFactory
-                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), connectionNameStrategy);
+                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), resourceLoader,
+                        credentialsProvider, credentialsRefreshService, connectionNameStrategy);
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
                 final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
                 wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
@@ -217,7 +227,8 @@ public class MultiRabbitAutoConfiguration {
 
             final ConnectionFactory defaultConnectionFactory = StringUtils.hasText(defaultConnectionFactoryKey)
                     ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
-                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, connectionNameStrategy);
+                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader,
+                    credentialsProvider, credentialsRefreshService, connectionNameStrategy);
             wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
 
             return wrapper;

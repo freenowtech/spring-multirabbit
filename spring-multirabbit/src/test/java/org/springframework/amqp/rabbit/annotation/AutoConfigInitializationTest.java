@@ -1,16 +1,14 @@
 package org.springframework.amqp.rabbit.annotation;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration;
 import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.stereotype.Component;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link MultiRabbitAutoConfiguration} is normally triggered before the processing of the Listeners by the
@@ -19,19 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This test makes sure to test MultiRabbit without the injection of a RabbitTemplate as a workaround for the
  * initialization.
  */
-// TODO https://github.com/freenowtech/spring-multirabbit/issues/49
-@Disabled
 class AutoConfigInitializationTest {
 
-    private static final int ADMINS = 3;
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
+            AutoConfigurations.of(MultiRabbitAutoConfiguration.class, RabbitAutoConfiguration.class));
 
     @Test
     void shouldStartContextWithoutConnectionFactory() {
-        final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-                ThreeBrokersConfig.class, MultiRabbitAutoConfiguration.class, RabbitAutoConfiguration.class,
-                ListenerBeans.class);
-        assertEquals(ADMINS, ctx.getBeansOfType(RabbitAdmin.class).size());
-        ctx.close(); // Close and stop the listeners
+        this.contextRunner
+                .withPropertyValues("spring.multirabbitmq.enabled=true")
+                .withPropertyValues("spring.multirabbitmq.connections.broker1.port=5673")
+                .withPropertyValues("spring.multirabbitmq.connections.broker2.port=5674")
+                .withBean(ListenerBeans.class)
+                .run((context) -> assertThat(context.getBeansOfType(RabbitAdmin.class)).hasSize(3));
     }
 
     @Component
@@ -58,13 +56,5 @@ class AutoConfigInitializationTest {
                 key = "routingKey2"))
         void listenBroker2(final String message) {
         }
-    }
-
-    /**
-     * Configuration to provide 3 brokers.
-     */
-    @Configuration
-    @PropertySource("classpath:application-three-brokers.properties")
-    public static class ThreeBrokersConfig {
     }
 }

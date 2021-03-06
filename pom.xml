@@ -28,7 +28,6 @@
 
     <modules>
         <module>spring-multirabbit</module>
-        <module>spring-multirabbit-integration</module>
         <module>spring-multirabbit-examples/spring-multirabbit-example-java</module>
         <module>spring-multirabbit-examples/spring-multirabbit-example-kotlin</module>
         <module>spring-multirabbit-examples/spring-multirabbit-extension-example</module>
@@ -38,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <springboot.version>2.3.9.RELEASE</springboot.version>
+        <springboot.version>2.4.0</springboot.version>
     </properties>
 
     <scm>
