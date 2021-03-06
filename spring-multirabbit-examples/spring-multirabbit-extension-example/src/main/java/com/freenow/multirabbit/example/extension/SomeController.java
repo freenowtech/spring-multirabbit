@@ -1,4 +1,4 @@
-package com.freenow.multirabbit.example;
+package com.freenow.multirabbit.example.extension;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.amqp.ConnectionFactoryContextWrapper;

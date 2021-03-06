@@ -1,4 +1,4 @@
-package com.freenow.multirabbit.example
+package com.freenow.multirabbit.example.kotlin
 
 import mu.KLogging
 import org.springframework.amqp.rabbit.annotation.Exchange

@@ -1,7 +1,7 @@
-package com.freenow.multirabbit.example;
+package com.freenow.multirabbit.example.extension;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerAnnotationBeanPostProcessor;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -11,18 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.amqp.MultiRabbitConstants;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.freenow.multirabbit.example.ExtendedConfiguration.EXTENDED_CONNECTION_A;
-import static com.freenow.multirabbit.example.ExtendedConfiguration.EXTENDED_CONNECTION_B;
+import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_A;
+import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_B;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 class ApplicationTest {
 
     @Autowired
@@ -58,10 +56,10 @@ class ApplicationTest {
     @Test
     void shouldResolveRabbitAdminBeans() {
         List<String> beans = Arrays.asList(applicationContext.getBeanNamesForType(RabbitAdmin.class));
-        assertTrue(beans.containsAll(Arrays.asList(
+        Assertions.assertThat(beans).contains(
                 MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME,
                 EXTENDED_CONNECTION_A + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
-                EXTENDED_CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX)));
+                EXTENDED_CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX);
         beans.forEach(bean -> assertNotNull(applicationContext.getBean(bean, RabbitAdmin.class)));
     }
 }

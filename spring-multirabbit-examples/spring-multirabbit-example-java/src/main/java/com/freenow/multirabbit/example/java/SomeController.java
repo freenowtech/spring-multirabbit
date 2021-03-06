@@ -1,4 +1,4 @@
-package com.freenow.multirabbit.example;
+package com.freenow.multirabbit.example.java;
 
 import org.springframework.amqp.rabbit.connection.SimpleResourceHolder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

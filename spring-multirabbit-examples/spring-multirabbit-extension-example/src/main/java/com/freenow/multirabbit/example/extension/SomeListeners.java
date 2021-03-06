@@ -1,4 +1,4 @@
-package com.freenow.multirabbit.example;
+package com.freenow.multirabbit.example.extension;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

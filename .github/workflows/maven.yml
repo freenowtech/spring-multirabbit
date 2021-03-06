@@ -27,5 +27,4 @@ jobs:
           java-version: ${{ matrix.java }}
           architecture: x64
       - run: java -version
-      - run: mvn -v
-      - run: mvn -B verify
+      - run: mvn -B -U verify

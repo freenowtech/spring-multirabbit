@@ -1,4 +1,4 @@
-package com.freenow.multirabbit.example;
+package com.freenow.multirabbit.example.extension;
 
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
