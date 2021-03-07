@@ -22,6 +22,7 @@ class AutoConfigInitializationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
             AutoConfigurations.of(MultiRabbitAutoConfiguration.class, RabbitAutoConfiguration.class));
 
+    // TODO https://github.com/freenowtech/spring-multirabbit/issues/49
     @Test
     void shouldStartContextWithoutConnectionFactory() {
         this.contextRunner

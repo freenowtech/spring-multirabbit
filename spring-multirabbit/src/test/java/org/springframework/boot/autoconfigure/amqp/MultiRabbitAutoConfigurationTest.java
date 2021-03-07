@@ -158,6 +158,7 @@ class MultiRabbitAutoConfigurationTest {
                 });
     }
 
+    // TODO https://github.com/freenowtech/spring-multirabbit/issues/49
     @Test
     @DisplayName("should ensure MultiRabbit AnnotationBeanPostProcessor")
     void shouldEnsureBPP() {
@@ -175,6 +176,7 @@ class MultiRabbitAutoConfigurationTest {
                 });
     }
 
+    // TODO https://github.com/freenowtech/spring-multirabbit/issues/49
     @Test
     @DisplayName("should ensure MultiRabbit declarables from Listeners")
     void shouldEnsureListenersDeclarables() {
