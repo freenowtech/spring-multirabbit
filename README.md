@@ -5,7 +5,6 @@
 
 **Spring MultiRabbit** is a library to enable multiple RabbitMQ brokers in SpringBoot applications. The modules are:
 * **spring-multirabbit** - the main module, that provides the auto-configuration feature;
-* **spring-multirabbit-integration** - a module to test integration with Spring;
 * **spring-multirabbit-example-java** - an example project in Java;
 * **spring-multirabbit-example-kotlin** - an example project in Kotlin;
 * **spring-multirabbit-extension-example** - an example project of how to extend spring-multirabbit;
@@ -14,8 +13,9 @@
 To use the library, the project must:
 1. Be a SpringBoot project annotated with **@EnableRabbit**, as usual;
 2. Import the library **spring-multirabbit**;
-3. Provide configuration for additional brokers in the new path **spring.multirabbitmq.connections**. All 
-   attributes available for **spring.rabbitmq** can be used in **spring.multirabbitmq.connections**. 
+3. Enable MultiRabbit by setting **spring.multirabbitmq.enabled=true**. By default, MultiRabbit is disabled.
+3. Provide configuration for additional brokers under **spring.multirabbitmq.connections**. All
+   attributes available for **spring.rabbitmq** can be used under **spring.multirabbitmq.connections**.
 4. Change the container factory context when using non-default connections:
    1. For ```RabbitTemplate```, use ```SimpleResourceHolder.bind()``` and ```SimpleResourceHolder.unbind()```;
    2. For ```@RabbitListener```, define the ```containerFactory``` or leave it blank for the default connection.
@@ -54,6 +54,7 @@ spring:
         host: 10.0.0.10
         port: 5672
     multirabbitmq:
+        enabled: true
         connections:
             connectionNameA:
                 host: 200.10.10.10
@@ -131,6 +132,7 @@ any of the connections under **spring.multirabbitmq.connections**, the connectio
 ```yaml
 spring:
     multirabbitmq:
+        enabled: true
         connections:
             connectionNameA:
                 host: localhost
@@ -147,6 +149,7 @@ the default connection.
 ```yaml
 spring:
     multirabbitmq:
+        enabled: true
         defaultConnection: connectionNameA
         connections:
             connectionNameA:
@@ -165,6 +168,7 @@ spring:
         host: localhost
         port: 5672
     multirabbitmq:
+        enabled: true
         connections:
             connectionNameA:
                 host: localhost
@@ -184,6 +188,7 @@ spring:
         host: localhost
         port: 5672
     multirabbitmq:
+        enabled: true
         connections:
             connectionNameA:
                 defaultConnection: true
