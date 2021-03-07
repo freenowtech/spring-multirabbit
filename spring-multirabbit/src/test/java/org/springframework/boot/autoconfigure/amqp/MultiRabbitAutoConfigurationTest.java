@@ -83,8 +83,14 @@ class MultiRabbitAutoConfigurationTest {
                     assertThat(annotationBPP).isNotInstanceOf(MultiRabbitListenerAnnotationBeanPostProcessor.class);
 
                     final ThrowingCallable connectionFactoryCreator = () -> context
-                            .getBean(MultiRabbitConnectionFactoryCreator.class);
+                            .getBean(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME,
+                                    RabbitAutoConfiguration.RabbitConnectionFactoryCreator.class);
                     assertThatThrownBy(connectionFactoryCreator).isInstanceOf(NoSuchBeanDefinitionException.class);
+
+                    final ThrowingCallable multiRabbitConnectionFactoryCreator = () -> context
+                            .getBean(MultiRabbitConnectionFactoryCreator.class);
+                    assertThatThrownBy(multiRabbitConnectionFactoryCreator)
+                            .isInstanceOf(NoSuchBeanDefinitionException.class);
 
                     final ThrowingCallable contextWrapper = () -> context
                             .getBean(MultiRabbitConnectionFactoryWrapper.class);
@@ -137,9 +143,14 @@ class MultiRabbitAutoConfigurationTest {
                     assertThat(connectionFactory2).isNotNull();
                     assertThat(connectionFactory2.getPort()).isEqualTo(5674);
 
-                    final MultiRabbitConnectionFactoryCreator connectionFactoryCreator = context
-                            .getBean(MultiRabbitConnectionFactoryCreator.class);
+                    final RabbitAutoConfiguration.RabbitConnectionFactoryCreator connectionFactoryCreator = context
+                            .getBean(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME,
+                                    RabbitAutoConfiguration.RabbitConnectionFactoryCreator.class);
                     assertThat(connectionFactoryCreator).isNotNull();
+
+                    final MultiRabbitConnectionFactoryCreator multiRabbitConnectionFactoryCreator = context
+                            .getBean(MultiRabbitConnectionFactoryCreator.class);
+                    assertThat(multiRabbitConnectionFactoryCreator).isNotNull();
 
                     final MultiRabbitConnectionFactoryWrapper contextWrapper = context
                             .getBean(MultiRabbitConnectionFactoryWrapper.class);

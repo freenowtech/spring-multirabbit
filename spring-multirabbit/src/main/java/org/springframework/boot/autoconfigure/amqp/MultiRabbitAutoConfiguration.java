@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -25,7 +24,6 @@ import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.Rabbi
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -45,24 +43,10 @@ import org.springframework.util.StringUtils;
 @Configuration
 @ConditionalOnClass({RabbitTemplate.class, Channel.class})
 @EnableConfigurationProperties({RabbitProperties.class, MultiRabbitProperties.class})
-@Import({MultiRabbitBootstrapConfiguration.class, RabbitAnnotationDrivenConfiguration.class})
+@Import({MultiRabbitBootstrapConfiguration.class, RabbitAutoConfiguration.class})
 public class MultiRabbitAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRabbitAutoConfiguration.class);
-
-    /**
-     * Creates an {@link AmqpAdmin}.
-     *
-     * @param connectionFactory The {@link ConnectionFactory} to be associated to.
-     * @return an {@link AmqpAdmin}.
-     */
-    @Bean(MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME)
-    @Primary
-    @ConditionalOnSingleCandidate(ConnectionFactory.class)
-    @ConditionalOnProperty(prefix = "spring.rabbitmq", name = "dynamic", matchIfMissing = true)
-    public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
-        return new RabbitAdmin(connectionFactory);
-    }
 
     /**
      * Returns a {@link RabbitConnectionFactoryCreator}.
@@ -71,6 +55,7 @@ public class MultiRabbitAutoConfiguration {
      */
     @Primary
     @Bean(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME)
+    @ConditionalOnProperty(prefix = "spring.multirabbitmq", name = "enabled", havingValue = "true")
     public RabbitConnectionFactoryCreator rabbitConnectionFactoryCreator() {
         return new RabbitConnectionFactoryCreator();
     }
