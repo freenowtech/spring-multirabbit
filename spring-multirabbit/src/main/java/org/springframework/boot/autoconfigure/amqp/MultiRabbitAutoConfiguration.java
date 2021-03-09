@@ -223,7 +223,7 @@ public class MultiRabbitAutoConfiguration {
          * Registers the ContainerFactory bean.
          */
         private SimpleRabbitListenerContainerFactory newContainerFactory(final ConnectionFactory connectionFactory) {
-            SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
+            final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
             containerFactory.setConnectionFactory(connectionFactory);
             return containerFactory;
         }
@@ -232,17 +232,14 @@ public class MultiRabbitAutoConfiguration {
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
         private RabbitAdmin newRabbitAdmin(final ConnectionFactory connectionFactory) {
-            RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-            rabbitAdmin.setApplicationContext(applicationContext);
-            rabbitAdmin.afterPropertiesSet();
-            return rabbitAdmin;
+            return new RabbitAdmin(connectionFactory);
         }
 
         /**
          * Registers the ContainerFactory bean.
          */
         private void registerContainerFactoryBean(final String name,
-                                                  final AbstractRabbitListenerContainerFactory containerFactory) {
+                                                  final AbstractRabbitListenerContainerFactory<?> containerFactory) {
             beanFactory.registerSingleton(name, containerFactory);
         }
 
@@ -250,9 +247,11 @@ public class MultiRabbitAutoConfiguration {
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
         private void registerRabbitAdminBean(final String name, final RabbitAdmin rabbitAdmin) {
+            final String beanName = name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
             rabbitAdmin.setApplicationContext(applicationContext);
             rabbitAdmin.afterPropertiesSet();
-            beanFactory.registerSingleton(name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX, rabbitAdmin);
+            rabbitAdmin.setBeanName(beanName);
+            beanFactory.registerSingleton(beanName, rabbitAdmin);
         }
 
         @Override
