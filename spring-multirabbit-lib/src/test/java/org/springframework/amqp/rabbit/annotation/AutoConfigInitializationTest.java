@@ -22,6 +22,7 @@ class AutoConfigInitializationTest {
 
     private static final int ADMINS = 3;
 
+    // TODO https://github.com/freenowtech/spring-multirabbit/issues/49
     @Test
     void shouldStartContextWithoutConnectionFactory() {
         final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
