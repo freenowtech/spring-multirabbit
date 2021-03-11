@@ -3,7 +3,6 @@ package org.springframework.boot.autoconfigure.amqp;
 import com.rabbitmq.client.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
@@ -19,8 +18,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -42,24 +39,10 @@ import java.util.Map;
 @Configuration
 @ConditionalOnClass({RabbitTemplate.class, Channel.class})
 @EnableConfigurationProperties({RabbitProperties.class, MultiRabbitProperties.class})
-@Import({MultiRabbitBootstrapConfiguration.class, RabbitAnnotationDrivenConfiguration.class})
+@Import({MultiRabbitBootstrapConfiguration.class, RabbitAutoConfiguration.class})
 public class MultiRabbitAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRabbitAutoConfiguration.class);
-
-    /**
-     * Creates an {@link AmqpAdmin}.
-     *
-     * @param connectionFactory The {@link ConnectionFactory} to be associated to.
-     * @return an {@link AmqpAdmin}.
-     */
-    @Bean(MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME)
-    @Primary
-    @ConditionalOnSingleCandidate(ConnectionFactory.class)
-    @ConditionalOnProperty(prefix = "spring.rabbitmq", name = "dynamic", matchIfMissing = true)
-    public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
-        return new RabbitAdmin(connectionFactory);
-    }
 
     /**
      * Returns a {@link RabbitAutoConfiguration.RabbitConnectionFactoryCreator}.
@@ -227,7 +210,7 @@ public class MultiRabbitAutoConfiguration {
          * Registers the ContainerFactory bean.
          */
         private SimpleRabbitListenerContainerFactory newContainerFactory(final ConnectionFactory connectionFactory) {
-            SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
+            final SimpleRabbitListenerContainerFactory containerFactory = new SimpleRabbitListenerContainerFactory();
             containerFactory.setConnectionFactory(connectionFactory);
             return containerFactory;
         }
@@ -236,17 +219,14 @@ public class MultiRabbitAutoConfiguration {
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
         private RabbitAdmin newRabbitAdmin(final ConnectionFactory connectionFactory) {
-            RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-            rabbitAdmin.setApplicationContext(applicationContext);
-            rabbitAdmin.afterPropertiesSet();
-            return rabbitAdmin;
+            return new RabbitAdmin(connectionFactory);
         }
 
         /**
          * Registers the ContainerFactory bean.
          */
         private void registerContainerFactoryBean(final String name,
-                                                  final AbstractRabbitListenerContainerFactory containerFactory) {
+                                                  final AbstractRabbitListenerContainerFactory<?> containerFactory) {
             beanFactory.registerSingleton(name, containerFactory);
         }
 
@@ -254,9 +234,11 @@ public class MultiRabbitAutoConfiguration {
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
         private void registerRabbitAdminBean(final String name, final RabbitAdmin rabbitAdmin) {
+            final String beanName = name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
             rabbitAdmin.setApplicationContext(applicationContext);
             rabbitAdmin.afterPropertiesSet();
-            beanFactory.registerSingleton(name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX, rabbitAdmin);
+            rabbitAdmin.setBeanName(beanName);
+            beanFactory.registerSingleton(beanName, rabbitAdmin);
         }
 
         @Override
