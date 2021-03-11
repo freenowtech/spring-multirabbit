@@ -23,6 +23,9 @@ public class MultiRabbitBootstrapConfiguration implements ImportBeanDefinitionRe
     @Override
     public void registerBeanDefinitions(final AnnotationMetadata importingClassMetadata,
                                         final BeanDefinitionRegistry registry) {
+        if (registry.containsBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+            registry.removeBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME);
+        }
         registry.registerBeanDefinition(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
                 new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
     }
