@@ -12,7 +12,7 @@ import org.springframework.amqp.core.Declarable;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.MultiRabbitListenerAnnotationBeanPostProcessor;
+import org.springframework.amqp.rabbit.annotation.ExtendedMultiRabbitListenerAnnotationBeanPostProcessor;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -80,7 +80,8 @@ class MultiRabbitAutoConfigurationTest {
 
                     final Object annotationBPP = context
                             .getBean(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME);
-                    assertThat(annotationBPP).isNotInstanceOf(MultiRabbitListenerAnnotationBeanPostProcessor.class);
+                    assertThat(annotationBPP)
+                            .isNotInstanceOf(ExtendedMultiRabbitListenerAnnotationBeanPostProcessor.class);
 
                     final ThrowingCallable connectionFactoryCreator = () -> context
                             .getBean(MultiRabbitConstants.CONNECTION_FACTORY_CREATOR_BEAN_NAME,
@@ -172,7 +173,8 @@ class MultiRabbitAutoConfigurationTest {
                 .run((context) -> {
                     final Object annotationBPP = context
                             .getBean(RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME);
-                    assertThat(annotationBPP).isInstanceOf(MultiRabbitListenerAnnotationBeanPostProcessor.class);
+                    assertThat(annotationBPP)
+                            .isInstanceOf(ExtendedMultiRabbitListenerAnnotationBeanPostProcessor.class);
                 });
     }
 

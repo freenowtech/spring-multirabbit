@@ -16,10 +16,14 @@ import org.springframework.util.StringUtils;
  * corresponds to that specific {@link org.springframework.amqp.rabbit.core.RabbitAdmin}, preventing the server from
  * being populated with non-expected structures from other servers.
  *
+ * This class is being being deprecated in spring-amqp v2.3.5 in favor of
+ * {@link org.springframework.amqp.rabbit.annotation.MultiRabbitListenerAnnotationBeanPostProcessor}. For compatibility
+ * with the current state of the class mentioned, this one is renamed.
+ *
  * @author Wander Costa
  * @see RabbitListenerAnnotationBeanPostProcessor
  */
-public final class MultiRabbitListenerAnnotationBeanPostProcessor
+public final class ExtendedMultiRabbitListenerAnnotationBeanPostProcessor
         extends RabbitListenerAnnotationBeanPostProcessor {
 
     @Override
