@@ -41,7 +41,7 @@ class MultiRabbitBootstrapConfigurationTest {
 
         verify(registry).registerBeanDefinition(
                 RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
-                new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
+                new RootBeanDefinition(ExtendedMultiRabbitListenerAnnotationBeanPostProcessor.class));
     }
 
     @Test
@@ -51,6 +51,6 @@ class MultiRabbitBootstrapConfigurationTest {
 
         verify(registry, never()).registerBeanDefinition(
                 RabbitListenerConfigUtils.RABBIT_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
-                new RootBeanDefinition(MultiRabbitListenerAnnotationBeanPostProcessor.class));
+                new RootBeanDefinition(ExtendedMultiRabbitListenerAnnotationBeanPostProcessor.class));
     }
 }

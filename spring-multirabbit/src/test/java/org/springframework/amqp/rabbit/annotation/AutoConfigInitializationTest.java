@@ -12,8 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link MultiRabbitAutoConfiguration} is normally triggered before the processing of the Listeners by the
- * {@link MultiRabbitListenerAnnotationBeanPostProcessor}. However, this does not happen whenever there is no injection
- * of {@link org.springframework.amqp.rabbit.connection.ConnectionFactory}.
+ * {@link ExtendedMultiRabbitListenerAnnotationBeanPostProcessor}. However, this does not happen whenever there is no
+ * injection of {@link org.springframework.amqp.rabbit.connection.ConnectionFactory}.
  * This test makes sure to test MultiRabbit without the injection of a RabbitTemplate as a workaround for the
  * initialization.
  */
