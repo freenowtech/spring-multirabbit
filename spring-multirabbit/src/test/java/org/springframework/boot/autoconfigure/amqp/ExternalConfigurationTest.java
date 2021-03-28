@@ -123,6 +123,23 @@ class ExternalConfigurationTest {
                 });
     }
 
+    @Test
+    @DisplayName("should register additional aliases for external integration")
+    void shouldRegisterAdditionalAliasesFromExternalIntegration() {
+        this.contextRunner
+                .withPropertyValues("spring.multirabbitmq.enabled=true")
+                .run((context) -> {
+                    final RabbitAdmin externalAdmin = context.getBean(
+                            ExternalConfig.CONNECTION_KEY.concat(MultiRabbitConstants.RABBIT_ADMIN_SUFFIX),
+                            RabbitAdmin.class);
+                    final RabbitAdmin alias1 = context.getBean(ExternalConfig.RABBIT_ALIAS_1, RabbitAdmin.class);
+                    final RabbitAdmin alias2 = context.getBean(ExternalConfig.RABBIT_ALIAS_2, RabbitAdmin.class);
+                    assertThat(externalAdmin).isSameAs(ExternalConfig.RABBIT_ADMIN);
+                    assertThat(alias1).isSameAs(externalAdmin);
+                    assertThat(alias2).isSameAs(externalAdmin);
+                });
+    }
+
     @Configuration
     @Import(MultiRabbitAutoConfiguration.class)
     static class ExternalConfig {
@@ -133,12 +150,15 @@ class ExternalConfigurationTest {
                 = mock(SimpleRabbitListenerContainerFactory.class);
         private static final RabbitAdmin RABBIT_ADMIN = mock(RabbitAdmin.class);
         private static final ConnectionFactory DEFAULT_CONNECTION_FACTORY = mock(ConnectionFactory.class);
+        private static final String RABBIT_ALIAS_1 = "rabbitAlias1";
+        private static final String RABBIT_ALIAS_2 = "rabbitAlias2";
 
         @Bean
         @ConditionalOnClass(MultiRabbitConnectionFactoryWrapper.class)
         static MultiRabbitConnectionFactoryWrapper externalWrapper() {
-            MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
-            wrapper.addConnectionFactory(CONNECTION_KEY, CONNECTION_FACTORY, CONTAINER_FACTORY, RABBIT_ADMIN);
+            final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
+            wrapper.addConnectionFactory(CONNECTION_KEY, CONNECTION_FACTORY, CONTAINER_FACTORY, RABBIT_ADMIN,
+                    RABBIT_ALIAS_1, RABBIT_ALIAS_2);
             wrapper.setDefaultConnectionFactory(DEFAULT_CONNECTION_FACTORY);
             return wrapper;
         }

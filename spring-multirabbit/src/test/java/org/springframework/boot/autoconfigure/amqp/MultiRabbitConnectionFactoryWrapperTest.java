@@ -52,9 +52,9 @@ class MultiRabbitConnectionFactoryWrapperTest {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory);
 
-        assertSame(connectionFactory, wrapper.getConnectionFactories().get(DUMMY_KEY));
-        assertNull(wrapper.getContainerFactories().get(DUMMY_KEY));
-        assertNull(wrapper.getRabbitAdmins().get(DUMMY_KEY));
+        assertSame(connectionFactory, wrapper.getEntries().get(DUMMY_KEY).getConnectionFactory());
+        assertNull(wrapper.getEntries().get(DUMMY_KEY).getContainerFactory());
+        assertNull(wrapper.getEntries().get(DUMMY_KEY).getRabbitAdmin());
     }
 
     @Test
@@ -62,9 +62,9 @@ class MultiRabbitConnectionFactoryWrapperTest {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory, containerFactory);
 
-        assertSame(connectionFactory, wrapper.getConnectionFactories().get(DUMMY_KEY));
-        assertSame(containerFactory, wrapper.getContainerFactories().get(DUMMY_KEY));
-        assertNull(wrapper.getRabbitAdmins().get(DUMMY_KEY));
+        assertSame(connectionFactory, wrapper.getEntries().get(DUMMY_KEY).getConnectionFactory());
+        assertSame(containerFactory, wrapper.getEntries().get(DUMMY_KEY).getContainerFactory());
+        assertNull(wrapper.getEntries().get(DUMMY_KEY).getRabbitAdmin());
     }
 
     @Test
@@ -72,9 +72,9 @@ class MultiRabbitConnectionFactoryWrapperTest {
         MultiRabbitConnectionFactoryWrapper wrapper = wrapper();
         wrapper.addConnectionFactory(DUMMY_KEY, connectionFactory, containerFactory, rabbitAdmin);
 
-        assertSame(connectionFactory, wrapper.getConnectionFactories().get(DUMMY_KEY));
-        assertSame(containerFactory, wrapper.getContainerFactories().get(DUMMY_KEY));
-        assertSame(rabbitAdmin, wrapper.getRabbitAdmins().get(DUMMY_KEY));
+        assertSame(connectionFactory, wrapper.getEntries().get(DUMMY_KEY).getConnectionFactory());
+        assertSame(containerFactory, wrapper.getEntries().get(DUMMY_KEY).getContainerFactory());
+        assertSame(rabbitAdmin, wrapper.getEntries().get(DUMMY_KEY).getRabbitAdmin());
     }
 
     @Test

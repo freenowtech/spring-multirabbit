@@ -5,6 +5,7 @@ import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
@@ -133,8 +134,10 @@ public class MultiRabbitAutoConfiguration {
                 throw new IllegalArgumentException("A default ConnectionFactory must be provided.");
             }
 
-            aggregatedWrapper.getContainerFactories().forEach(this::registerContainerFactoryBean);
-            aggregatedWrapper.getRabbitAdmins().forEach(this::registerRabbitAdminBean);
+            aggregatedWrapper.getEntries().forEach((name, value) -> {
+                registerContainerFactoryBean(name, value.getContainerFactory());
+                registerRabbitAdminAndAliases(name, value.getRabbitAdmin(), value.getRabbitAdminAliases());
+            });
 
             final SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
             connectionFactory.setTargetConnectionFactories(aggregatedWrapper.getConnectionFactories());
@@ -151,26 +154,13 @@ public class MultiRabbitAutoConfiguration {
                 final MultiRabbitConnectionFactoryWrapper internalWrapper,
                 final MultiRabbitConnectionFactoryWrapper externalWrapper) {
             final MultiRabbitConnectionFactoryWrapper aggregatedWrapper = new MultiRabbitConnectionFactoryWrapper();
-            copyConnectionSets(aggregatedWrapper, internalWrapper);
-            copyConnectionSets(aggregatedWrapper, externalWrapper);
+            aggregatedWrapper.putEntriesFrom(internalWrapper);
+            aggregatedWrapper.putEntriesFrom(externalWrapper);
 
             aggregatedWrapper.setDefaultConnectionFactory(externalWrapper.getDefaultConnectionFactory() != null
                     ? externalWrapper.getDefaultConnectionFactory()
                     : internalWrapper.getDefaultConnectionFactory());
             return aggregatedWrapper;
-        }
-
-        /**
-         * Copies the connection sets from a source wrapper to the aggregated wrapper.
-         */
-        private void copyConnectionSets(
-                final MultiRabbitConnectionFactoryWrapper aggregatedWrapper,
-                final MultiRabbitConnectionFactoryWrapper sourceWrapper) {
-            sourceWrapper.getConnectionFactories().forEach((key, value) -> aggregatedWrapper.addConnectionFactory(
-                    String.valueOf(key),
-                    sourceWrapper.getConnectionFactories().get(key),
-                    sourceWrapper.getContainerFactories().get(key),
-                    sourceWrapper.getRabbitAdmins().get(key)));
         }
 
         /**
@@ -246,12 +236,17 @@ public class MultiRabbitAutoConfiguration {
         /**
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
-        private void registerRabbitAdminBean(final String name, final RabbitAdmin rabbitAdmin) {
+        private void registerRabbitAdminAndAliases(final String name,
+                                                   final RabbitAdmin rabbitAdmin,
+                                                   final Set<String> aliases) {
             final String beanName = name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
             rabbitAdmin.setApplicationContext(applicationContext);
             rabbitAdmin.afterPropertiesSet();
             rabbitAdmin.setBeanName(beanName);
             beanFactory.registerSingleton(beanName, rabbitAdmin);
+            if (aliases != null && !aliases.isEmpty()) {
+                aliases.forEach(alias -> beanFactory.registerAlias(beanName, alias));
+            }
         }
 
         @Override

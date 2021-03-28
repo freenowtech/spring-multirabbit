@@ -17,6 +17,9 @@ import java.util.List;
 
 import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_A;
 import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_B;
+import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_C;
+import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_C_ADMIN_ALIAS_1;
+import static com.freenow.multirabbit.example.extension.ExtendedConfiguration.EXTENDED_CONNECTION_C_ADMIN_ALIAS_2;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -48,7 +51,7 @@ class ApplicationTest {
         List<String> beans = Arrays.asList(applicationContext
                 .getBeanNamesForType(SimpleRabbitListenerContainerFactory.class));
         assertTrue(beans.containsAll(Arrays.asList("rabbitListenerContainerFactory", EXTENDED_CONNECTION_A,
-                EXTENDED_CONNECTION_B)));
+                EXTENDED_CONNECTION_B, EXTENDED_CONNECTION_C)));
         beans.forEach(bean -> assertNotNull(applicationContext
                 .getBean(bean, SimpleRabbitListenerContainerFactory.class)));
     }
@@ -59,7 +62,18 @@ class ApplicationTest {
         Assertions.assertThat(beans).contains(
                 MultiRabbitConstants.DEFAULT_RABBIT_ADMIN_BEAN_NAME,
                 EXTENDED_CONNECTION_A + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
-                EXTENDED_CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX);
+                EXTENDED_CONNECTION_B + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
+                EXTENDED_CONNECTION_C + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX);
         beans.forEach(bean -> assertNotNull(applicationContext.getBean(bean, RabbitAdmin.class)));
+    }
+
+    @Test
+    void shouldResolveRabbitAdminAliases() {
+        final RabbitAdmin admin = applicationContext.getBean(
+                EXTENDED_CONNECTION_C + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX, RabbitAdmin.class);
+        Assertions.assertThat(admin).isSameAs(applicationContext.getBean(EXTENDED_CONNECTION_C_ADMIN_ALIAS_1,
+                RabbitAdmin.class));
+        Assertions.assertThat(admin).isSameAs(applicationContext.getBean(EXTENDED_CONNECTION_C_ADMIN_ALIAS_2,
+                RabbitAdmin.class));
     }
 }
