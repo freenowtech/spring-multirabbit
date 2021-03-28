@@ -4,8 +4,12 @@ import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFac
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.Assert.hasText;
@@ -20,7 +24,20 @@ import static org.springframework.util.Assert.notNull;
 public class MultiRabbitConnectionFactoryWrapper {
 
     private final Map<String, Entry> entries = new HashMap<>();
+    private final Map<String, Entry> immutableEntries = Collections.unmodifiableMap(entries);
+
     private ConnectionFactory defaultConnectionFactory;
+
+    /**
+     * Copies the entries from another {@link MultiRabbitConnectionFactoryWrapper}, replacing exiting keys (if any).
+     *
+     * @param fromWrapper The wrapper to copy from.
+     */
+    void putEntriesFrom(final MultiRabbitConnectionFactoryWrapper fromWrapper) {
+        if (fromWrapper != null) {
+            fromWrapper.getEntries().forEach(entries::put);
+        }
+    }
 
     /**
      * Sets the default {@code connectionFactory}.
@@ -61,7 +78,7 @@ public class MultiRabbitConnectionFactoryWrapper {
      */
     public void addConnectionFactory(final String key,
                                      final ConnectionFactory connectionFactory,
-                                     final AbstractRabbitListenerContainerFactory containerFactory) {
+                                     final AbstractRabbitListenerContainerFactory<?> containerFactory) {
         addConnectionFactory(key, connectionFactory, containerFactory, null);
     }
 
@@ -76,10 +93,37 @@ public class MultiRabbitConnectionFactoryWrapper {
      */
     public void addConnectionFactory(final String key,
                                      final ConnectionFactory connectionFactory,
-                                     final AbstractRabbitListenerContainerFactory containerFactory,
+                                     final AbstractRabbitListenerContainerFactory<?> containerFactory,
                                      final RabbitAdmin rabbitAdmin) {
+        addConnectionFactory(key, connectionFactory, containerFactory, rabbitAdmin, null);
+    }
+
+    /**
+     * Adds a {@link ConnectionFactory} associated to a ContainerFactory and a RabbitAdmin.
+     *
+     * @param key                The key for the structures.
+     * @param connectionFactory  The {@link ConnectionFactory}.
+     * @param containerFactory   The related
+     *                           {@link org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory}.
+     * @param rabbitAdmin        The related {@link RabbitAdmin}.
+     * @param rabbitAdminAliases The aliases for the {@link RabbitAdmin}.
+     */
+    public void addConnectionFactory(final String key,
+                                     final ConnectionFactory connectionFactory,
+                                     final AbstractRabbitListenerContainerFactory<?> containerFactory,
+                                     final RabbitAdmin rabbitAdmin,
+                                     final String... rabbitAdminAliases) {
         hasText(key, "Key may not be null or empty");
-        entries.put(key, new Entry(connectionFactory, containerFactory, rabbitAdmin));
+        entries.put(key, new Entry(connectionFactory, containerFactory, rabbitAdmin, rabbitAdminAliases));
+    }
+
+    /**
+     * Returns an immutable map of entries.
+     *
+     * @return a map of entries.
+     */
+    public Map<String, Entry> getEntries() {
+        return immutableEntries;
     }
 
     /**
@@ -88,40 +132,19 @@ public class MultiRabbitConnectionFactoryWrapper {
      * @return the {@link Map} of {@link ConnectionFactory}s.
      */
     Map<Object, ConnectionFactory> getConnectionFactories() {
-        return entries.entrySet().stream()
+        return immutableEntries.entrySet().stream()
                 .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getConnectionFactory()));
-    }
-
-    /**
-     * Returns the {@link Map} of {@link AbstractRabbitListenerContainerFactory}s.
-     *
-     * @return the {@link Map} of {@link AbstractRabbitListenerContainerFactory}s.
-     */
-    Map<String, AbstractRabbitListenerContainerFactory> getContainerFactories() {
-        return entries.entrySet().stream()
-                .filter(entry -> entry.getValue().getContainerFactory() != null)
-                .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getContainerFactory()));
-    }
-
-    /**
-     * Returns the {@link Map} of {@link RabbitAdmin}s except the one set with key null.
-     *
-     * @return the {@link Map} of {@link RabbitAdmin}s except the one set with key null.
-     */
-    Map<String, RabbitAdmin> getRabbitAdmins() {
-        return entries.entrySet().stream()
-                .filter(entry -> entry.getValue().getRabbitAdmin() != null)
-                .collect(toMap(Map.Entry::getKey, entry -> entry.getValue().getRabbitAdmin()));
     }
 
     /**
      * An {@link Entry} of {@link MultiRabbitConnectionFactoryWrapper}.
      */
-    private static final class Entry {
+    static final class Entry {
 
         private final ConnectionFactory connectionFactory;
-        private final AbstractRabbitListenerContainerFactory containerFactory;
+        private final AbstractRabbitListenerContainerFactory<?> containerFactory;
         private final RabbitAdmin rabbitAdmin;
+        private final Set<String> rabbitAdminAliases;
 
         /**
          * Returns an entry containing the triple for the wrapper.
@@ -131,8 +154,9 @@ public class MultiRabbitConnectionFactoryWrapper {
          * @param rabbitAdmin       The related {@link RabbitAdmin}.
          */
         private Entry(final ConnectionFactory connectionFactory,
-                      final AbstractRabbitListenerContainerFactory containerFactory,
-                      final RabbitAdmin rabbitAdmin) {
+                      final AbstractRabbitListenerContainerFactory<?> containerFactory,
+                      final RabbitAdmin rabbitAdmin,
+                      final String... rabbitAdminAliases) {
             notNull(connectionFactory, "ConnectionFactory may not be null");
             if (containerFactory != null) {
                 containerFactory.setConnectionFactory(connectionFactory);
@@ -140,6 +164,9 @@ public class MultiRabbitConnectionFactoryWrapper {
             this.connectionFactory = connectionFactory;
             this.containerFactory = containerFactory;
             this.rabbitAdmin = rabbitAdmin;
+            this.rabbitAdminAliases = rabbitAdminAliases != null
+                    ? new HashSet<>(Arrays.asList(rabbitAdminAliases))
+                    : Collections.emptySet();
         }
 
         /**
@@ -156,7 +183,7 @@ public class MultiRabbitConnectionFactoryWrapper {
          *
          * @return the {@link AbstractRabbitListenerContainerFactory} of the entry.
          */
-        AbstractRabbitListenerContainerFactory getContainerFactory() {
+        AbstractRabbitListenerContainerFactory<?> getContainerFactory() {
             return containerFactory;
         }
 
@@ -167,6 +194,15 @@ public class MultiRabbitConnectionFactoryWrapper {
          */
         RabbitAdmin getRabbitAdmin() {
             return rabbitAdmin;
+        }
+
+        /**
+         * Returns the {@link Set} of aliases to be used for registering the {@link RabbitAdmin}.
+         *
+         * @return the {@link Set} of aliases.
+         */
+        Set<String> getRabbitAdminAliases() {
+            return rabbitAdminAliases;
         }
     }
 }
