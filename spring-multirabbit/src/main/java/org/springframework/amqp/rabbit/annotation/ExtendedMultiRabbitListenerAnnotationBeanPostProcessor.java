@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collection;
 import org.springframework.amqp.core.Declarable;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -25,6 +27,20 @@ import org.springframework.util.StringUtils;
  */
 public final class ExtendedMultiRabbitListenerAnnotationBeanPostProcessor
         extends RabbitListenerAnnotationBeanPostProcessor {
+
+    /**
+     * Injecting multiRabbitConnectionFactory bean to make sure
+     * {@link org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration} is completely initialized
+     * before start the post processor processAmqpListener.
+     *
+     * @param multiRabbitConnectionFactory Routing connection factory populated with the connection factories provided
+     *  from {@link org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration}.
+     */
+    public ExtendedMultiRabbitListenerAnnotationBeanPostProcessor(
+        final ConnectionFactory multiRabbitConnectionFactory) {
+        super();
+        Assert.state(multiRabbitConnectionFactory != null, "multiRabbitConnectionFactory must be available");
+    }
 
     @Override
     protected Collection<Declarable> processAmqpListener(final RabbitListener rabbitListener,
