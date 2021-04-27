@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.MultiRabbitBootstrapConfiguration;
+import org.springframework.amqp.rabbit.annotation.MultiRabbitListenerConfigurationSelector;
 import org.springframework.amqp.rabbit.config.AbstractRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @ConditionalOnClass({RabbitTemplate.class, Channel.class})
 @EnableConfigurationProperties({RabbitProperties.class, MultiRabbitProperties.class})
-@Import({MultiRabbitBootstrapConfiguration.class, RabbitAutoConfiguration.class})
+@Import({MultiRabbitListenerConfigurationSelector.class, RabbitAutoConfiguration.class})
 public class MultiRabbitAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRabbitAutoConfiguration.class);
@@ -108,9 +108,13 @@ public class MultiRabbitAutoConfiguration {
         /**
          * Returns the routing connection factory populated with the connection factories provided from configuration.
          *
-         * @param rabbitProperties      The default rabbit properties.
-         * @param multiRabbitProperties The additional rabbit properties.
-         * @param externalWrapper       The external wrapper for integration.
+         * @param rabbitProperties           The default rabbit properties.
+         * @param multiRabbitProperties      The additional rabbit properties.
+         * @param externalWrapper            The external wrapper for integration.
+         * @param resourceLoader             The resourceLoader.
+         * @param credentialsProvider        The credentialsProvider.
+         * @param credentialsRefreshService  The credentialsRefreshService.
+         * @param connectionNameStrategy     The connectionNameStrategy.
          * @return The routing connection factory.
          * @throws Exception if found any issue to instantiate and register the beans.
          */
