@@ -25,23 +25,33 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Maven Release and Publish
-        if: steps.changes.outputs.src == 'true'
+      - name: Maven Release and Publish    
         uses: qcastel/github-actions-maven-release@v1.12.17
-        continue-on-error: true
         with:
-          access-token: ${{ secrets.FREE_NOW_GITHUB_ACCESS_TOKEN }}
-          maven-args: "-DskipTests -DskipITs"
-          git-release-bot-name: "free-now-github"
-          git-release-bot-email: "70742378+free-now-github@users.noreply.github.com"
-          git-skip-sanity-check: true
-          ssh-private-key: ${{ secrets.FREE_NOW_GITHUB_PRIVATE_KEY }}
-          maven-project-folder: ${{ matrix.path }}
-          maven-repo-server-id: ossrh
-          maven-repo-server-username: ${{ secrets.FREE_NOW_GITHUB_USER }}
-          maven-repo-server-password: ${{ secrets.FREE_NOW_MAVEN_ACCESS_TOKEN }}
+          release-branch-name: "release-232-integration-with-maven-central"
+
           gpg-enabled: true
           gpg-key-id: ${{ secrets.FREE_NOW_GPG_KEY_ID }}
           gpg-key: ${{ secrets.FREE_NOW_GPG_KEY }}
           gpg-passphrase: ${{ secrets.FREE_NOW_GPG_PASSPHRASE }}
-          java-version: 1.8
+
+          ssh-private-key: ${{ secrets.FREE_NOW_GITHUB_PRIVATE_KEY }}
+
+          git-release-bot-name: "free-now-github"
+          git-release-bot-email: "70742378+free-now-github@users.noreply.github.com"
+
+          access-token: ${{ secrets.FREE_NOW_GITHUB_ACCESS_TOKEN }}
+
+          # Release
+          maven-repo-server-id: ossrh
+          maven-repo-server-username: ${{ secrets.FREE_NOW_GITHUB_USER }}
+          maven-repo-server-password: ${{ secrets.FREE_NOW_MAVEN_ACCESS_TOKEN }}          
+          maven-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
+
+          # Publish artifacts to
+          maven-publish-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
+          maven-release-publish: "true"
+          maven-snapshot-publish: "true"
+
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-1.8-openjdk/
