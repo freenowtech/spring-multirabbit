@@ -12,7 +12,7 @@
 
     <groupId>com.free-now.multirabbit</groupId>
     <artifactId>spring-multirabbit-example-kotlin</artifactId>
-    <version>2.3.3-SNAPSHOT</version>
+    <version>2.3.3</version>
     <packaging>jar</packaging>
 
     <name>Spring MultiRabbit Example for Kotlin</name>
@@ -125,4 +125,8 @@
             </plugin>
         </plugins>
     </build>
+
+  <scm>
+    <tag>spring-multirabbit-parent-2.3.3</tag>
+  </scm>
 </project>
