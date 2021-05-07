@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.free-now.multirabbit</groupId>
         <artifactId>spring-multirabbit-parent</artifactId>
         <version>2.3.2-SNAPSHOT</version>
-        <relativePath>../</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>spring-multirabbit</artifactId>
 
     <name>Spring MultiRabbit Library</name>
     <description>Library to extend Spring to provide connection to multiple RabbitMQ servers</description>
+    <url>https://github.com/freenowtech/spring-multirabbit</url>
+
+    <properties>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -58,6 +62,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
@@ -65,5 +70,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

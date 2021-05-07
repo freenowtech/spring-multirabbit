@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - release**
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.event.head_commit.message, '[release]')
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Setup Java 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Maven Release and Publish
+        if: steps.changes.outputs.src == 'true'
+        uses: qcastel/github-actions-maven-release@v1.12.17
+        continue-on-error: true
+        with:
+          access-token: ${{ secrets.FREE_NOW_GITHUB_ACCESS_TOKEN }}
+          maven-args: "-DskipTests -DskipITs"
+          git-release-bot-name: "free-now-github"
+          git-release-bot-email: "70742378+free-now-github@users.noreply.github.com"
+          git-skip-sanity-check: true
+          ssh-private-key: ${{ secrets.FREE_NOW_GITHUB_PRIVATE_KEY }}
+          maven-project-folder: ${{ matrix.path }}
+          maven-repo-server-id: ossrh
+          maven-repo-server-username: ${{ secrets.FREE_NOW_GITHUB_USER }}
+          maven-repo-server-password: ${{ secrets.FREE_NOW_MAVEN_ACCESS_TOKEN }}
+          gpg-enabled: true
+          gpg-key-id: ${{ secrets.FREE_NOW_GPG_KEY_ID }}
+          gpg-key: ${{ secrets.FREE_NOW_GPG_KEY }}
+          gpg-passphrase: ${{ secrets.FREE_NOW_GPG_PASSPHRASE }}
+          java-version: 1.8

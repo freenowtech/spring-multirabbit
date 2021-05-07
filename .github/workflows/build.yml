@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Build
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 11 ]
+        java: [ 8, 11, 14 ]
     name: Java ${{ matrix.java }}
     steps:
       - uses: actions/checkout@v2
@@ -28,4 +28,4 @@ jobs:
           architecture: x64
       - run: java -version
       - run: mvn -v
-      - run: mvn -B verify
+      - run: mvn -B verify -Dgpg.skip=true
