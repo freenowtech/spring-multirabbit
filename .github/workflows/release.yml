@@ -46,12 +46,7 @@ jobs:
           maven-repo-server-id: ossrh
           maven-repo-server-username: ${{ secrets.FREE_NOW_GITHUB_USER }}
           maven-repo-server-password: ${{ secrets.FREE_NOW_MAVEN_ACCESS_TOKEN }}          
-          maven-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
-
-          # Publish artifacts to
-          maven-publish-args: "-Dskip.unit.tests=true -Dskip.integration.tests=true"
-          maven-release-publish: "true"
-          maven-snapshot-publish: "true"
+          maven-args: "-DskipTests -DskipITs"
 
         env:
           JAVA_HOME: /usr/lib/jvm/java-1.8-openjdk/
