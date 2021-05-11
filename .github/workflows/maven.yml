@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         java: [ 8 ]
-    name: Java ${{ matrix.java }}
+    name: Build on Java ${{ matrix.java }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
