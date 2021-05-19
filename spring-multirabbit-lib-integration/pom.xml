@@ -10,7 +10,7 @@
         <relativePath />
     </parent>
 
-    <groupId>com.mytaxi.spring.multirabbit</groupId>
+    <groupId>com.free-now.multirabbit</groupId>
     <artifactId>spring-multirabbit-lib-integration</artifactId>
     <version>2.2.4-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -25,7 +25,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.mytaxi.spring.multirabbit</groupId>
+            <groupId>com.free-now.multirabbit</groupId>
             <artifactId>spring-multirabbit-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
