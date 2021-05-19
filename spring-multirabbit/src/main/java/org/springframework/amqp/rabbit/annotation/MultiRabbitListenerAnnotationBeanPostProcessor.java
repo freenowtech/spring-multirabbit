@@ -6,8 +6,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import org.springframework.amqp.core.AbstractDeclarable;
 import org.springframework.amqp.core.Declarable;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,6 +28,20 @@ public final class MultiRabbitListenerAnnotationBeanPostProcessor
         implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
+
+    /**
+     * Injecting multiRabbitConnectionFactory bean to make sure
+     * {@link org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration} is completely initialized
+     * before start the post processor processAmqpListener.
+     *
+     * @param multiRabbitConnectionFactory Routing connection factory populated with the connection factories provided
+     *  from {@link org.springframework.boot.autoconfigure.amqp.MultiRabbitAutoConfiguration}.
+     */
+    public MultiRabbitListenerAnnotationBeanPostProcessor(
+        final ConnectionFactory multiRabbitConnectionFactory) {
+        super();
+        Assert.state(multiRabbitConnectionFactory != null, "multiRabbitConnectionFactory must be available");
+    }
 
     @Override
     protected void processAmqpListener(final RabbitListener rabbitListener,
