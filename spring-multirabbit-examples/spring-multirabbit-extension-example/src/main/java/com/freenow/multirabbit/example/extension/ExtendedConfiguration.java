@@ -16,8 +16,6 @@ public class ExtendedConfiguration {
     static final String EXTENDED_CONNECTION_B = "extendedConnectionNameB";
     static final String EXTENDED_CONNECTION_C = "extendedConnectionNameC";
 
-    static final String EXTENDED_CONNECTION_C_ADMIN_ALIAS_1 = "anotherAdminBeanName";
-    static final String EXTENDED_CONNECTION_C_ADMIN_ALIAS_2 = "anotherOtherAdminBeanName";
     static final int CONNECTION_TIMEOUT = 50;
 
     @Bean
@@ -29,8 +27,7 @@ public class ExtendedConfiguration {
         final RabbitAdmin sharedAdmin = newRabbitAdmin(connA);
         wrapper.addConnectionFactory(EXTENDED_CONNECTION_A, connA, newContainerFactory(connA), sharedAdmin);
         wrapper.addConnectionFactory(EXTENDED_CONNECTION_B, connB, newContainerFactory(connB), newRabbitAdmin(connB));
-        wrapper.addConnectionFactory(EXTENDED_CONNECTION_C, connC, newContainerFactory(connC), sharedAdmin,
-                EXTENDED_CONNECTION_C_ADMIN_ALIAS_1, EXTENDED_CONNECTION_C_ADMIN_ALIAS_2);
+        wrapper.addConnectionFactory(EXTENDED_CONNECTION_C, connC, newContainerFactory(connC), sharedAdmin);
         wrapper.setDefaultConnectionFactory(connA);
         return wrapper;
     }
