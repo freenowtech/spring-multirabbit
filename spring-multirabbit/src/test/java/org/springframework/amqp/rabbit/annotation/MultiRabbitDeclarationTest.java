@@ -16,7 +16,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.stereotype.Component;
 import org.testcontainers.containers.RabbitMQContainer;
 
-public class MultiRabbitDeclarationTest {
+class MultiRabbitDeclarationTest {
 
     private final RabbitMQContainer defaultRabbit = new RabbitMQContainer("rabbitmq:3-management");
     private final RabbitMQContainer rabbit1 = new RabbitMQContainer("rabbitmq:3-management");

@@ -5,7 +5,6 @@ import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.MultiRabbitListenerConfigurationSelector;
@@ -35,6 +34,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.boot.autoconfigure.amqp.MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
 
 /**
  * Class responsible for auto-configuring the necessary beans to enable multiple RabbitMQ servers.
@@ -140,7 +141,7 @@ public class MultiRabbitAutoConfiguration {
 
             aggregatedWrapper.getEntries().forEach((name, value) -> {
                 registerContainerFactoryBean(name, value.getContainerFactory());
-                registerRabbitAdminAndAliases(name, value.getRabbitAdmin(), value.getRabbitAdminAliases());
+                registerRabbitAdmins(name, value.getConnectionFactory());
             });
 
             final SimpleRoutingConnectionFactory connectionFactory = new SimpleRoutingConnectionFactory();
@@ -240,17 +241,13 @@ public class MultiRabbitAutoConfiguration {
         /**
          * Register the RabbitAdmin bean (to enable context changing with Rabbit annotations).
          */
-        private void registerRabbitAdminAndAliases(final String name,
-                                                   final RabbitAdmin rabbitAdmin,
-                                                   final Set<String> aliases) {
-            final String beanName = name + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX;
+        private void registerRabbitAdmins(final String name, final ConnectionFactory connectionFactory) {
+            final String beanName = name + RABBIT_ADMIN_SUFFIX;
+            RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
             rabbitAdmin.setApplicationContext(applicationContext);
-            rabbitAdmin.afterPropertiesSet();
             rabbitAdmin.setBeanName(beanName);
+            rabbitAdmin.afterPropertiesSet();
             beanFactory.registerSingleton(beanName, rabbitAdmin);
-            if (aliases != null && !aliases.isEmpty()) {
-                aliases.forEach(alias -> beanFactory.registerAlias(beanName, alias));
-            }
         }
 
         @Override

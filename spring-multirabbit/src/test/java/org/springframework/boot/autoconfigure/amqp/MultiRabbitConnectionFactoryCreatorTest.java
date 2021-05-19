@@ -120,8 +120,9 @@ class MultiRabbitConnectionFactoryCreatorTest {
 
         assertTrue(routingConnectionFactory instanceof SimpleRoutingConnectionFactory);
         verify(beanFactory).registerSingleton(DUMMY_KEY, containerFactory);
-        verify(beanFactory).registerSingleton(DUMMY_KEY + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
-                rabbitAdmin);
+        verify(beanFactory).registerSingleton(
+            eq(DUMMY_KEY + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX), any(RabbitAdmin.class)
+        );
         verifyNoMoreInteractions(beanFactory);
     }
 
@@ -153,8 +154,9 @@ class MultiRabbitConnectionFactoryCreatorTest {
 
         assertTrue(routingConnectionFactory instanceof SimpleRoutingConnectionFactory);
         verify(beanFactory).registerSingleton(DUMMY_KEY, containerFactory);
-        verify(beanFactory).registerSingleton(DUMMY_KEY + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX,
-                rabbitAdmin);
+        verify(beanFactory).registerSingleton(
+            eq(DUMMY_KEY + MultiRabbitConstants.RABBIT_ADMIN_SUFFIX), any(RabbitAdmin.class)
+        );
         verifyNoMoreInteractions(beanFactory);
     }
 
