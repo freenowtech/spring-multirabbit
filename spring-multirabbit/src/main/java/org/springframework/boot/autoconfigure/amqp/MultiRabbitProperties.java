@@ -18,11 +18,6 @@ import java.util.Optional;
 public class MultiRabbitProperties {
 
     /**
-     * Enables Multiple Rabbit.
-     */
-    private boolean enabled = false;
-
-    /**
      * The name of the default connection, which will not require context binding
      * to be used.
      */
@@ -70,13 +65,5 @@ public class MultiRabbitProperties {
      */
     public void setConnections(@Nullable final Map<String, RabbitProperties> connections) {
         this.connections = Optional.ofNullable(connections).orElse(new HashMap<>());
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
     }
 }
