@@ -32,23 +32,15 @@ public class Application {
 ```
 
 ##### 2. pom.xml
-Add the reference to the repository, and the necessary libs:
+Add the reference to the necessary libs:
 ```xml
-<repositories>
-    <repository>
-        <id>bintray-mytaxi-oss</id>
-        <name>bintray</name>
-        <url>https://dl.bintray.com/mytaxi/oss</url>
-    </repository>
-</repositories>
-
 <dependencies>
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.mytaxi.spring.multirabbit</groupId>
+        <groupId>com.free-now.multirabbit</groupId>
         <artifactId>spring-multirabbit-lib</artifactId>
         <version>${multirabbit.version}</version>
     </dependency>
@@ -203,7 +195,7 @@ spring:
 ```
 
 ## Compatibility of versions
-For the table of compatibility, please visit the [Wiki](https://github.com/mytaxi/spring-multirabbit/wiki) page.
+For the table of compatibility, please visit the [Wiki](https://github.com/freenowtech/spring-multirabbit/wiki) page.
 
 ## More Examples
 More examples can be found at the modules **spring-multirabbit-example-java** and **spring-multirabbit-example-kotlin**.
