@@ -1,4 +1,4 @@
-name: Java CI
+name: CI
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    if: ${{ !startsWith(github.event.head_commit.message, '[maven-release-plugin] prepare') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,9 +35,9 @@ jobs:
       - run: mvn -B verify -Dgpg.skip=true
 
   release:
+    if: contains(github.ref, 'release') && startsWith(github.event.head_commit.message, '[release]')
     runs-on: ubuntu-latest
     needs: [build]
-    if:  contains(github.ref, 'release') && startsWith(github.event.head_commit.message, '[release]')
     name: Release
     steps:
       - name: Checkout source code
@@ -53,7 +54,7 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-          
+
       - name: Set env.BRANCH_NAME
         run: echo "BRANCH_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
 
@@ -61,13 +62,13 @@ jobs:
         uses: qcastel/github-actions-maven-release@v1.12.25
         with:
           release-branch-name: ${{ env.BRANCH_NAME }}
-          
+
           gpg-enabled: true
           gpg-key-id: ${{ secrets.FREE_NOW_GPG_KEY_ID }}
           gpg-key: ${{ secrets.FREE_NOW_GPG_KEY }}
           gpg-passphrase: ${{ secrets.FREE_NOW_GPG_PASSPHRASE }}
 
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.FREE_NOW_GITHUB_PRIVATE_KEY }}
 
           git-release-bot-name: "free-now-github"
           git-release-bot-email: "70742378+free-now-github@users.noreply.github.com"
