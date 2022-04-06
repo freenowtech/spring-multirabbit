@@ -128,10 +128,12 @@ public class MultiRabbitAutoConfiguration {
                 final ResourceLoader resourceLoader,
                 final ObjectProvider<CredentialsProvider> credentialsProvider,
                 final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
-                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) throws Exception {
+                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy,
+                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers) throws Exception {
             final MultiRabbitConnectionFactoryWrapper internalWrapper
                     = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties, resourceLoader,
-                    credentialsProvider, credentialsRefreshService, connectionNameStrategy);
+                    credentialsProvider, credentialsRefreshService, connectionNameStrategy,
+                    connectionFactoryCustomizers);
             final MultiRabbitConnectionFactoryWrapper aggregatedWrapper
                     = aggregateConnectionFactoryWrappers(internalWrapper, externalWrapper);
 
@@ -177,7 +179,8 @@ public class MultiRabbitAutoConfiguration {
                 final ResourceLoader resourceLoader,
                 final ObjectProvider<CredentialsProvider> credentialsProvider,
                 final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
-                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy) throws Exception {
+                final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy,
+                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers) throws Exception {
             final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
 
             final Map<String, RabbitProperties> propertiesMap = multiRabbitProperties != null
@@ -185,9 +188,13 @@ public class MultiRabbitAutoConfiguration {
                     : Collections.emptyMap();
 
             for (Map.Entry<String, RabbitProperties> entry : propertiesMap.entrySet()) {
+                final RabbitConnectionFactoryBeanConfigurer rabbitConnectionFactoryBeanConfigurer = springFactoryCreator.rabbitConnectionFactoryBeanConfigurer(entry.getValue(), resourceLoader,
+                        credentialsProvider, credentialsRefreshService);
+                final CachingConnectionFactoryConfigurer rabbitCachingConnectionFactoryConfigurer = springFactoryCreator.rabbitConnectionFactoryConfigurer(entry.getValue(),connectionNameStrategy);
+
                 final CachingConnectionFactory connectionFactory
-                        = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), resourceLoader,
-                        credentialsProvider, credentialsRefreshService, connectionNameStrategy);
+                        = springFactoryCreator.rabbitConnectionFactory( rabbitConnectionFactoryBeanConfigurer, rabbitCachingConnectionFactoryConfigurer,
+                        connectionFactoryCustomizers);
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
                 final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
                 wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
@@ -205,10 +212,15 @@ public class MultiRabbitAutoConfiguration {
                 throw new IllegalArgumentException(msg);
             }
 
+            final RabbitConnectionFactoryBeanConfigurer rabbitConnectionFactoryBeanConfigurer = springFactoryCreator.rabbitConnectionFactoryBeanConfigurer(rabbitProperties, resourceLoader,
+                    credentialsProvider, credentialsRefreshService);
+            final CachingConnectionFactoryConfigurer rabbitCachingConnectionFactoryConfigurer = springFactoryCreator.rabbitConnectionFactoryConfigurer(rabbitProperties,connectionNameStrategy);
+
             final ConnectionFactory defaultConnectionFactory = StringUtils.hasText(defaultConnectionFactoryKey)
                     ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
-                    : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader,
-                    credentialsProvider, credentialsRefreshService, connectionNameStrategy);
+                    : springFactoryCreator.rabbitConnectionFactory(rabbitConnectionFactoryBeanConfigurer,rabbitCachingConnectionFactoryConfigurer,
+                    connectionFactoryCustomizers);
+
             wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
 
             return wrapper;
