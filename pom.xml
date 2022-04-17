@@ -57,7 +57,8 @@
         <java.version>1.8</java.version>
 
         <springboot.version>2.4.0</springboot.version>
-        <testcontainers-rabbitmq.version>1.15.2</testcontainers-rabbitmq.version>
+        <testcontainers-rabbitmq.version>1.17.1</testcontainers-rabbitmq.version>
+        <java-jna.version>5.8.0</java-jna.version>
 
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -77,6 +78,12 @@
                 <version>${springboot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>${java-jna.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
