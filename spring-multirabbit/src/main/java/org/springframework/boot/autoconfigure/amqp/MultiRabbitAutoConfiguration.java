@@ -129,11 +129,11 @@ public class MultiRabbitAutoConfiguration {
                 final ObjectProvider<CredentialsProvider> credentialsProvider,
                 final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
                 final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy,
-                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers) throws Exception {
+                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizer) throws Exception {
             final MultiRabbitConnectionFactoryWrapper internalWrapper
                     = instantiateConnectionFactories(rabbitProperties, multiRabbitProperties, resourceLoader,
                     credentialsProvider, credentialsRefreshService, connectionNameStrategy,
-                    connectionFactoryCustomizers);
+                    connectionFactoryCustomizer);
             final MultiRabbitConnectionFactoryWrapper aggregatedWrapper
                     = aggregateConnectionFactoryWrappers(internalWrapper, externalWrapper);
 
@@ -180,7 +180,7 @@ public class MultiRabbitAutoConfiguration {
                 final ObjectProvider<CredentialsProvider> credentialsProvider,
                 final ObjectProvider<CredentialsRefreshService> credentialsRefreshService,
                 final ObjectProvider<ConnectionNameStrategy> connectionNameStrategy,
-                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizers) throws Exception {
+                final ObjectProvider<ConnectionFactoryCustomizer> connectionFactoryCustomizer) throws Exception {
             final MultiRabbitConnectionFactoryWrapper wrapper = new MultiRabbitConnectionFactoryWrapper();
 
             final Map<String, RabbitProperties> propertiesMap = multiRabbitProperties != null
@@ -191,7 +191,7 @@ public class MultiRabbitAutoConfiguration {
                 final CachingConnectionFactory connectionFactory
                         = springFactoryCreator.rabbitConnectionFactory(entry.getValue(), resourceLoader,
                         credentialsProvider, credentialsRefreshService, connectionNameStrategy,
-                        connectionFactoryCustomizers);
+                        connectionFactoryCustomizer);
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
                 final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
                 wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
@@ -213,7 +213,7 @@ public class MultiRabbitAutoConfiguration {
                     ? wrapper.getConnectionFactories().get(defaultConnectionFactoryKey)
                     : springFactoryCreator.rabbitConnectionFactory(rabbitProperties, resourceLoader,
                     credentialsProvider, credentialsRefreshService, connectionNameStrategy,
-                    connectionFactoryCustomizers);
+                    connectionFactoryCustomizer);
             wrapper.setDefaultConnectionFactory(defaultConnectionFactory);
 
             return wrapper;
