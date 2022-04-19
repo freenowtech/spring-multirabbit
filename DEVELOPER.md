@@ -52,10 +52,10 @@ gpg --list-keys
 ```
 2. Delete the secret keys
 ```
-gpg --delete-secret-keys "Wander Costa"
+gpg --delete-secret-keys "Some Name"
 ```
 3. Delete the keys
 ```
-gpg --delete-keys "Wander Costa"
+gpg --delete-keys "Some Name"
 ```
 4. Create a new key following the instructions above
