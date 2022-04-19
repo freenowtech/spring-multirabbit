@@ -1,17 +1,9 @@
-# Spring MultiRabbit - Developer's guide
+# Developer's Guide
 Spring MultiRabbit is released under the Apache 2.0 license.
-If you would like to contribute some work, or propose fixes, this document can provide you instructions.
-
-## How to Contribute
-- Create an issue in the repository explaining your contribution 
-- Fork the repository to your own GitHub account 
-- Create a PR to push your code to Spring MultiRabbit's `main` branch. If it's a change that should be limited to a
-  specific release, create the PR to the specific release instead (e.g. `release/2.5`)
 
 ## Building
-Spring MultiRabbit depends on Java 8 (minimum, for compatibility), Maven 3, Docker and GPG.
-Make sure to have them installed, so you can fully run tests.
-For instructions on GPG, read instructions below.
+Spring MultiRabbit depends on Java 8 (minimum, for compatibility), Maven 3, Docker and GPG. Make sure to have them
+installed, so you can fully run tests. For instructions on GPG, read instructions below.
 
 To build Spring MultiRabbit, run:
 ```shell
@@ -39,10 +31,10 @@ gpg --generate-key
 ```
 4. Add the following to the ~/.m2/settings.xml under the `servers` section
 ```xml
-        <server>
-           <id>gpg.passphrase</id>
-           <passphrase>someNonProductionPassPhrase</passphrase>
-        </server>
+<server>
+    <id>gpg.passphrase</id>
+    <passphrase>someNonProductionPassPhrase</passphrase>
+</server>
 ```
 
 If you already have a key, but doesn't remember the password, you can remove the key and recreate it.
