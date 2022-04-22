@@ -263,11 +263,19 @@ class MultiRabbitConnectionFactoryCreatorTest {
     @Test
     void shouldInstantiateMultiRabbitConnectionFactoryWrapperWithDefaultAndMultipleConnections() throws Exception {
         final MultiRabbitConnectionFactoryWrapper externalWrapper = new MultiRabbitConnectionFactoryWrapper();
+        externalWrapper.setDefaultConnectionFactory(connectionFactory0);
+
+        when(springFactoryCreator.rabbitConnectionFactoryBeanConfigurer(secondaryRabbitProperties, resourceLoader,
+                credentialsProvider, credentialsRefreshService))
+                .thenReturn(rabbitConnectionFactoryBeanConfigurer);
+
+        when(springFactoryCreator.rabbitConnectionFactoryConfigurer(secondaryRabbitProperties, connectionNameStrategy))
+                .thenReturn(rabbitCachingConnectionFactoryConfigurer);
 
         when(springFactoryCreator.rabbitConnectionFactory(
-                eq(rabbitConnectionFactoryBeanConfigurer),
-                eq(rabbitCachingConnectionFactoryConfigurer),
-                eq(connectionFactoryCustomizer)))
+                rabbitConnectionFactoryBeanConfigurer,
+                rabbitCachingConnectionFactoryConfigurer,
+                connectionFactoryCustomizer))
                 .thenReturn(new CachingConnectionFactory());
 
         MultiRabbitProperties multiRabbitProperties = new MultiRabbitProperties();
