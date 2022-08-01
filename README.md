@@ -1,6 +1,5 @@
 # Spring MultiRabbit
-
-[![Latest release](https://img.shields.io/github/release/freenowtech/spring-multirabbit.svg)](https://github.com/freenowtech/spring-multirabbit/releases/latest)
+[![Latest release](https://maven-badges.herokuapp.com/maven-central/com.free-now.multirabbit/spring-multirabbit/badge.svg)](https://mvnrepository.com/artifact/com.free-now.multirabbit/spring-multirabbit)
 ![Build Status](https://github.com/freenowtech/spring-multirabbit/actions/workflows/maven.yml/badge.svg)
 
 **Spring MultiRabbit** is a library to enable multiple RabbitMQ brokers in SpringBoot applications. The modules are:
