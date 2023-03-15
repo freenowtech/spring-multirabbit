@@ -6,21 +6,21 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.0</version>
+        <version>3.0.0</version>
         <relativePath />
     </parent>
 
     <groupId>com.free-now.multirabbit</groupId>
     <artifactId>spring-multirabbit-extended-example-java</artifactId>
-    <version>2.7.1-SNAPSHOT</version>
+    <version>3.0.0</version>
     <packaging>jar</packaging>
 
     <name>Spring MultiRabbit Extension Example</name>
     <description>Example module to showcase extension of spring-multirabbit</description>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencies>
