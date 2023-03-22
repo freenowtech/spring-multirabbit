@@ -56,7 +56,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
 
-        <springboot.version>3.0.0</springboot.version>
+        <springboot.version>3.0.4</springboot.version>
         <testcontainers-rabbitmq.version>1.17.1</testcontainers-rabbitmq.version>
         <java-jna.version>5.8.0</java-jna.version>
 
