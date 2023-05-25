@@ -202,6 +202,11 @@ public class MultiRabbitAutoConfiguration {
                         rabbitCachingConnectionFactoryConfigurer,
                         connectionFactoryCustomizer);
                 final SimpleRabbitListenerContainerFactory containerFactory = newContainerFactory(connectionFactory);
+                SimpleRabbitListenerContainerFactoryConfigurer configurer =
+                        new SimpleRabbitListenerContainerFactoryConfigurer(entry.getValue());
+                configurer.configure(containerFactory, connectionFactory);
+                containerFactory.setBatchListener(entry.getValue().getListener().getSimple().isConsumerBatchEnabled());
+
                 final RabbitAdmin rabbitAdmin = newRabbitAdmin(connectionFactory);
                 wrapper.addConnectionFactory(entry.getKey(), connectionFactory, containerFactory, rabbitAdmin);
             }
