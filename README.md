@@ -8,6 +8,9 @@
 * **spring-multirabbit-example-kotlin** - an example project in Kotlin;
 * **spring-multirabbit-extension-example** - an example project of how to extend spring-multirabbit;
 
+## Status: Repository Archived
+This repository has been archived and is no longer actively maintained.
+
 ## How-to
 To use the library, the project must:
 1. Be a SpringBoot project annotated with **@EnableRabbit**, as usual;
